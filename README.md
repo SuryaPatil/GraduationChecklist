@@ -2,8 +2,10 @@
 
 > This is a full stack React-Express app that can parse Stony Brook University PDF Transcripts written in a specific format.
 
-## Quick Start
+## Installing Node
 Running this project requires Node.js. If Node is not installed on your machine, follow these directions: https://nodejs.org/en/download/
+
+## Quick Start
 ```bash
 # Install dependencies server/client
 npm install
