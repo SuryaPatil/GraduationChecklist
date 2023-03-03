@@ -10,6 +10,7 @@ In your terminal, go into the root project directory:
 ```bash
 cd GraduationChecklist
 ```
+Next, install the necessary packages by typing in the following commnads:
 ```bash
 # Install dependencies server/client
 npm install
