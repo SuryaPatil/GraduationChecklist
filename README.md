@@ -20,3 +20,4 @@ npm run dev
 ```
 In a web browser, type localhost:3000. At this point, you should see this page:
 <img width="720" alt="Screen Shot 2023-03-03 at 4 19 03 PM" src="https://user-images.githubusercontent.com/78182536/222831372-05f46688-88ab-4a09-941b-07accff79681.png">
+Click "Browse" to select a PDF transcript from your computer, and click "Upload" to upload your file. 
