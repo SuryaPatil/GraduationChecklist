@@ -6,7 +6,7 @@
 Running this project requires Node.js. If Node is not installed on your machine, follow these directions: https://nodejs.org/en/download/
 
 ## Project setup
-In your terminal, go into the project root directory and type in the following commnads:
+In your terminal, go into the root project directory and type in the following commnads:
 ```bash
 # Install dependencies server/client
 npm install
@@ -14,6 +14,7 @@ cd client
 npm install
 ```
 ## Start the application
+In the root project directory, enter the following command:
 ```bash
 # Serve in localhost:3000
 npm run dev
