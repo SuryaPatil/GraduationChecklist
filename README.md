@@ -31,6 +31,6 @@ Click "Browse" to select a PDF transcript from your computer, and click "Upload"
 Example terminal output where program can parse the transcript (the transcript format I worked with originally): 
 <img width="613" alt="Screen Shot 2023-03-03 at 4 25 37 PM" src="https://user-images.githubusercontent.com/78182536/222833276-5ecab669-b4a0-48de-9cff-d6912fdca4ea.png">
 
-Example terminal output where program cannot parse the transcript (the transcript Prof. Esmaili sent me): 
+Example terminal output where program cannot parse the transcript (the transcript format Prof. Esmaili sent me): 
 <img width="604" alt="Screen Shot 2023-03-03 at 4 26 09 PM" src="https://user-images.githubusercontent.com/78182536/222833316-a0b11393-604e-40c0-8369-c0602ee30561.png">
 
