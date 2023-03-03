@@ -6,7 +6,10 @@
 Running this project requires Node.js. If Node is not installed on your machine, follow these directions: https://nodejs.org/en/download/
 
 ## Project setup
-In your terminal, go into the root project directory and type in the following commnads:
+In your terminal, go into the root project directory:
+```bash
+cd GraduationChecklist
+```
 ```bash
 # Install dependencies server/client
 npm install
