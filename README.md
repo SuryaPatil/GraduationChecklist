@@ -14,7 +14,7 @@ cd client
 npm install
 ```
 ## Start the application
-# Serve in localhost:3000
 ```bash
+# Serve in localhost:3000
 npm run dev
 ```
