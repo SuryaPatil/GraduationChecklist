@@ -18,3 +18,4 @@ npm install
 # Serve in localhost:3000
 npm run dev
 ```
+In a web browser, type localhost:3000. At this point, you should see this page:
