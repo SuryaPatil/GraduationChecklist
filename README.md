@@ -10,6 +10,6 @@ npm install
 cd client
 npm install
 
-# Serve on localhost:3000
+# Serve on localhost:3000. In project directory, run:
 npm run dev
 ```
