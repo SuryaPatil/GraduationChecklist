@@ -23,7 +23,7 @@ const FileUpload = () => {
   const [iwr, setIwr] = useState([])      
   
 
-  const getCourses = async () => {
+/*  const getCourses = async () => {
 
     try {
         const response = await axios.get("http://localhost:5000/postCourse")
@@ -48,7 +48,7 @@ const FileUpload = () => {
     } catch (error) {
         console.log(error);    
     }
-  }
+  } */
   
 
   const lower_divs = ["CSE  114", "CSE  214", "CSE  215", "CSE  216", "CSE  220"];
@@ -233,9 +233,9 @@ const FileUpload = () => {
       setUploadPercentage(0)
     }
   };
-  useEffect(() => {
+ /* useEffect(() => {
     getCourses();
-},[]);
+},[]); */ 
 
 console.log(courses)
 
