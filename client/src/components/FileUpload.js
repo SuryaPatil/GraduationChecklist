@@ -3,7 +3,22 @@ import Message from './Message';
 import Progress from './Progress';
 import axios from 'axios';
 
+class Course{
+  constructor(name, grade, credits, term, year, type){
+    this.name = name;
+    this.grade = grade;
+    this.credits = credits; 
+    this.term  = term;
+    this.year = year; 
+    this.type = type; 
+  }
+  toString(){
+    return `${this.name} ${this.grade} ${this.credits} ${this.term} ${this.year} ${this.type}`
+  }
+}
+
 const FileUpload = () => {
+  const courses = [] // store course info without a database 
   const [file, setFile] = useState('');
   const [filename, setFilename] = useState('Choose File');
   const [message, setMessage] = useState('');
@@ -12,18 +27,18 @@ const FileUpload = () => {
   const [major,setMajor] = useState(""); 
   const [isCSE, setIsCSE] = useState(false); 
 
-  const [courses, setCourses] = useState([]);
-  const [ld, setLd] = useState([]);
-  const [ud, setUd] = useState([]);
-  const [te, setTe] = useState([]);
-  const [math,setMath] = useState([])
-  const [natsci, setNatsci] = useState([]);
-  const [ild, setIld] = useState([])
-  const [iud, setIud] = useState([])
-  const [iwr, setIwr] = useState([])      
+  //const [courses, setCourses] = useState([]);
+  const [ld, setLd] = useState([]); // lower division courses
+  const [ud, setUd] = useState([]); // upper division courses
+  const [te, setTe] = useState([]); // technical electives
+  const [math,setMath] = useState([]) // math courses
+  const [natsci, setNatsci] = useState([]); // natural science courses
+  const [ild, setIld] = useState([]) // ISE lower division courses
+  const [iud, setIud] = useState([]) // ISE upper division courses
+  const [iwr, setIwr] = useState([]) // ISE writing requirement 
   
-
-/*  const getCourses = async () => {
+  /* Fill in the arrays via get requests from the backend */
+  const getCourses = async () => {
 
     try {
         const response = await axios.get("http://localhost:5000/postCourse")
@@ -35,7 +50,7 @@ const FileUpload = () => {
         const ise_lower_div_response = await axios.get("http://localhost:5000/postCourse/ise_lower_div")
         const ise_upper_div_response = await axios.get("http://localhost:5000/postCourse/ise_upper_div")
         const ise_write_req_response = await axios.get("http://localhost:5000/postCourse/ise_write_req")
-        setCourses(response.data);
+    //    setCourses(response.data);
         setLd(ld_response.data);
         setUd(ud_response.data); 
         setTe(te_response.data); 
@@ -48,7 +63,7 @@ const FileUpload = () => {
     } catch (error) {
         console.log(error);    
     }
-  } */
+  }
   
 
   const lower_divs = ["CSE  114", "CSE  214", "CSE  215", "CSE  216", "CSE  220"];
@@ -89,7 +104,6 @@ const FileUpload = () => {
     const tsm_core = ["EST  201","EST  202","EST  391","EST  392","EST  393"]
     const tsm_supp = ["EST  310","ISE  340","EST  323","EST  326","EST  327","EST  364"]
 
-  const terms = ["Fall","Winter","Spring","Summer"]
   function is_numeric_char(c) { return /\d/.test(c); }
   function isLetter(str) { return str.length === 1 && str.match(/[a-z]/i); }
 
@@ -108,12 +122,9 @@ const FileUpload = () => {
       const res = await axios.post('/upload', formData)
       
       let str = res.data;
-      console.log("Text: ")
-      console.log(res.data)
-      return; 
+
       const splitLines = str => str.split(/\r?\n/);
       const lines = splitLines(str);
-     //console.log(lines); 
       var s = "";
       for (var i = 0; i < lines.length; i++) {
         if(lines[i] === "Plan:Computer Science Major"){
@@ -123,11 +134,10 @@ const FileUpload = () => {
         }
         if(lines[i] === "Plan:Information Systems Major"){
           setMajor("ISE")
-          setIsCSE(false); 
+     //     setIsCSE(false); 
           console.log("ISE")
         }
       }
-      
       for (var i = 0; i < lines.length; i++) {
 
             var b = "";
@@ -136,12 +146,10 @@ const FileUpload = () => {
             if(b === "Fall" || b === "Wint" || b === "Spri" || b === "Summ"){
               b = lines[i]
               s = b;
-           //   console.log(s);
             }
 
             if(lines[i].length >= 8){
           const course = lines[i].substring(0,8);
-          const t = lines[i].substring(0,10); 
 
           if(lower_divs.includes(course) || upper_divs.includes(course) || tech_electives.includes(course) 
           || math_reqs.includes(course) || nat_sci.includes(course) || ise_lower_divs.includes(course) ||
@@ -210,7 +218,7 @@ const FileUpload = () => {
             else if(ise_write_req.includes(course)){
               type = "ISE Writing Req";
             }
-           console.log(course+" "+credits+" "+grade+" "+season+" "+year+" "+type); 
+         //  console.log(course+" "+credits+" "+grade+" "+season+" "+year+" "+type); 
            let data = {
             "course": course,
             "credits": credits,
@@ -220,8 +228,19 @@ const FileUpload = () => {
             "type":type
            }
            axios.post("http://localhost:5000/postCourse",data); 
+           
+           let new_course = new Course(course, credits, grade, season, year, type)
+       //    console.log(new_course.toString())
+           courses.push(new_course) 
           }
         }
+      }
+      console.log("looping thru array: ")
+      let k = 0
+      console.log(courses.length)
+      while(k < courses.length){
+        console.log(courses[k].toString())
+        k++
       }
       setMessage('File Uploaded'); 
     } catch (err) {
@@ -233,11 +252,10 @@ const FileUpload = () => {
       setUploadPercentage(0)
     }
   };
- /* useEffect(() => {
+  useEffect(() => {
     getCourses();
-},[]); */ 
+},[]);
 
-console.log(courses)
 
   return (
     <Fragment>
@@ -263,7 +281,6 @@ console.log(courses)
           className='btn btn-primary btn-block mt-4'
         />
       </form>
-      { isCSE ? (
       <Fragment>
         <h3>Lower Division
         <table className="table mt-5 text-center"> 
@@ -305,7 +322,7 @@ console.log(courses)
       {ud.map(course => (
           <tr key ={course.course}>
             <td>{course.course}</td>
-            <td>{course.credits}</td>
+            <td>7</td>
             <td>{course.grade}</td>
             <td>{course.term}</td>
             <td>{course.year}</td>
@@ -391,114 +408,6 @@ console.log(courses)
         </table>
         </h3>
         </Fragment>
-      ): <Fragment>
-        <h3>
-          Lower Division
-          <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {ild.map(course => (
-          <tr key ={course.course}>
-            <td>{course.course}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
-        </h3>
-        <h3>
-          Upper Division
-          <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {iud.map(course => (
-          <tr key ={course.course}>
-            <td>{course.course}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
-        </h3>
-        <h3>
-          Writing Requirement
-          <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {iwr.map(course => (
-          <tr key ={course.course}>
-            <td>{course.course}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
-        </h3>
-        <h3>
-          Math Requirements
-          <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {math.map(course => (
-          <tr key ={course.course}>
-            <td>{course.course}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
-        </h3>
-
-      </Fragment>
-      }   
   
     </Fragment>
   );
