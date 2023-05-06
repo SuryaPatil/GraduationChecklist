@@ -2,20 +2,16 @@ import React, { Fragment, useState,useEffect } from 'react';
 import Message from './Message';
 import Progress from './Progress';
 import axios from 'axios';
+import { db } from "./firebase-config";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 
-class Course{
-  constructor(name, grade, credits, term, year, type){
-    this.name = name;
-    this.grade = grade;
-    this.credits = credits; 
-    this.term  = term;
-    this.year = year; 
-    this.type = type; 
-  }
-  toString(){
-    return `${this.name} ${this.grade} ${this.credits} ${this.term} ${this.year} ${this.type}`
-  }
-}
 
 const FileUpload = () => {
   const courses = [] // store course info without a database 
@@ -36,34 +32,14 @@ const FileUpload = () => {
   const [ild, setIld] = useState([]) // ISE lower division courses
   const [iud, setIud] = useState([]) // ISE upper division courses
   const [iwr, setIwr] = useState([]) // ISE writing requirement 
-  
-  /* Fill in the arrays via get requests from the backend */
-  const getCourses = async () => {
 
-    try {
-        const response = await axios.get("http://localhost:5000/postCourse")
-        const ld_response = await axios.get("http://localhost:5000/postCourse/lower_divs")
-        const ud_response = await axios.get("http://localhost:5000/postCourse/upper_divs")
-        const te_response = await axios.get("http://localhost:5000/postCourse/techs")
-        const math_response = await axios.get("http://localhost:5000/postCourse/math")
-        const natsci_response = await axios.get("http://localhost:5000/postCourse/nat")
-        const ise_lower_div_response = await axios.get("http://localhost:5000/postCourse/ise_lower_div")
-        const ise_upper_div_response = await axios.get("http://localhost:5000/postCourse/ise_upper_div")
-        const ise_write_req_response = await axios.get("http://localhost:5000/postCourse/ise_write_req")
-    //    setCourses(response.data);
-        setLd(ld_response.data);
-        setUd(ud_response.data); 
-        setTe(te_response.data); 
-        setMath(math_response.data); 
-        setNatsci(natsci_response.data); 
-        setIld(ise_lower_div_response.data)
-        setIud(ise_upper_div_response.data) 
-        setIwr(ise_write_req_response.data)
 
-    } catch (error) {
-        console.log(error);    
-    }
-  }
+  const ldCollectionRef = collection(db, "lower division");
+  const udCollectionRef = collection(db, "upper division");
+  const teCollectionRef = collection(db, "technical electives");
+  const mathCollectionRef = collection(db, "math");
+  const sciCollectionRef = collection(db, "natural sciences");
+
   
 
   const lower_divs = ["CSE  114", "CSE  214", "CSE  215", "CSE  216", "CSE  220"];
@@ -106,6 +82,8 @@ const FileUpload = () => {
 
   function is_numeric_char(c) { return /\d/.test(c); }
   function isLetter(str) { return str.length === 1 && str.match(/[a-z]/i); }
+
+
 
   const onChange = e => {
     setFile(e.target.files[0]);
@@ -192,21 +170,26 @@ const FileUpload = () => {
               season += s[j];
               j++; 
             }
-            var type = "";
+            var type = ""; 
 
             if(lower_divs.includes(course)){
+              await addDoc(ldCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
               type = "Lower Division";
             }
             else if(upper_divs.includes(course)){
+              await addDoc(udCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
               type = "Upper Division";
             }
             else if(math_reqs.includes(course)){
+              await addDoc(mathCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
               type = "Math Requirement";
             }
             else if(tech_electives.includes(course)){
+              await addDoc(teCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
               type = "Technical Elective";
             }
             else if(nat_sci.includes(course)){
+              await addDoc(sciCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
               type = "Natural Science";
             }
             else if(ise_lower_divs.includes(course)){
@@ -218,7 +201,6 @@ const FileUpload = () => {
             else if(ise_write_req.includes(course)){
               type = "ISE Writing Req";
             }
-         //  console.log(course+" "+credits+" "+grade+" "+season+" "+year+" "+type); 
            let data = {
             "course": course,
             "credits": credits,
@@ -228,18 +210,12 @@ const FileUpload = () => {
             "type":type
            }
            axios.post("http://localhost:5000/postCourse",data); 
-           
-           let new_course = new Course(course, credits, grade, season, year, type)
-       //    console.log(new_course.toString())
-           courses.push(new_course) 
           }
         }
       }
-      console.log("looping thru array: ")
       let k = 0
-      console.log(courses.length)
       while(k < courses.length){
-        console.log(courses[k].toString())
+      //  console.log(courses[k].toString())
         k++
       }
       setMessage('File Uploaded'); 
@@ -252,7 +228,21 @@ const FileUpload = () => {
       setUploadPercentage(0)
     }
   };
+
   useEffect(() => {
+    const getCourses = async () => {
+      const ldData = await getDocs(ldCollectionRef);
+      setLd(ldData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      const udData = await getDocs(udCollectionRef);
+      setUd(udData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      const teData = await getDocs(teCollectionRef);
+      setTe(teData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      const mathData = await getDocs(mathCollectionRef);
+      setMath(mathData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      const natData = await getDocs(sciCollectionRef);
+      setNatsci(natData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    };
+
     getCourses();
 },[]);
 
@@ -296,7 +286,7 @@ const FileUpload = () => {
       <tbody>
       {ld.map(course => (
           <tr key ={course.course}>
-            <td>{course.course}</td>
+            <td>{course.name}</td>
             <td>{course.credits}</td>
             <td>{course.grade}</td>
             <td>{course.term}</td>
@@ -321,8 +311,8 @@ const FileUpload = () => {
       <tbody>
       {ud.map(course => (
           <tr key ={course.course}>
-            <td>{course.course}</td>
-            <td>7</td>
+            <td>{course.name}</td>
+            <td>{course.credits}</td>
             <td>{course.grade}</td>
             <td>{course.term}</td>
             <td>{course.year}</td>
@@ -346,7 +336,7 @@ const FileUpload = () => {
       <tbody>
       {te.map(course => (
           <tr key ={course.course}>
-            <td>{course.course}</td>
+            <td>{course.name}</td>
             <td>{course.credits}</td>
             <td>{course.grade}</td>
             <td>{course.term}</td>
@@ -371,7 +361,7 @@ const FileUpload = () => {
       <tbody>
       {math.map(course => (
           <tr key ={course.course}>
-            <td>{course.course}</td>
+            <td>{course.name}</td>
             <td>{course.credits}</td>
             <td>{course.grade}</td>
             <td>{course.term}</td>
@@ -396,7 +386,7 @@ const FileUpload = () => {
       <tbody>
       {natsci.map(course => (
           <tr key ={course.course}>
-            <td>{course.course}</td>
+            <td>{course.name}</td>
             <td>{course.credits}</td>
             <td>{course.grade}</td>
             <td>{course.term}</td>

@@ -17,6 +17,7 @@
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "express-fileupload": "^1.1.4",
+    "firebase": "^9.21.0",
     "fs": "^0.0.1-security",
     "pdf-parse": "^1.1.1",
     "pdf-to-base64": "^1.0.3",
