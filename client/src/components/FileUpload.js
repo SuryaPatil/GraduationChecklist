@@ -8,10 +8,8 @@ import {
   collection,
   getDocs,
   addDoc,
-  updateDoc,
   deleteDoc,
   doc,
-  firebase
 } from "firebase/firestore";
 
 //const firebase = require('firebase');
@@ -23,7 +21,6 @@ const FileUpload = () => {
   const [message, setMessage] = useState('');
   const [uploadPercentage, setUploadPercentage] = useState(0);
 
-  const [major,setMajor] = useState(""); 
   const [isCSE, setIsCSE] = useState(false); 
 
   //const [courses, setCourses] = useState([]);
@@ -32,16 +29,27 @@ const FileUpload = () => {
   const [te, setTe] = useState([]); // technical electives
   const [math,setMath] = useState([]) // math courses
   const [natsci, setNatsci] = useState([]); // natural science courses
+  
   const [ild, setIld] = useState([]) // ISE lower division courses
   const [iud, setIud] = useState([]) // ISE upper division courses
   const [iwr, setIwr] = useState([]) // ISE writing requirement 
-
+  const [imat, setImat] = useState([]) // ISE writing requirement 
+  const [be, setBe] = useState([])
+  const [fis, setFis] = useState([])
+  const [hi, setHi] = useState([])
+  const [sna, setSna] = useState([])
+  const [ism, seTsm] = useState([])
 
   const ldCollectionRef = collection(db, "lower division");
   const udCollectionRef = collection(db, "upper division");
   const teCollectionRef = collection(db, "technical electives");
   const mathCollectionRef = collection(db, "math");
   const sciCollectionRef = collection(db, "natural sciences");
+
+  const ildCollectionRef = collection(db, "ise lower division");
+  const iudCollectionRef = collection(db, "ise upper division");
+  const iwrCollectionRef = collection(db, "ise write req");
+  const isemathCollectionRef = collection(db, "ise math req");
 
   const lower_divs = ["CSE  114", "CSE  214", "CSE  215", "CSE  216", "CSE  220"];
   const upper_divs = ["CSE  300", "CSE  303", "CSE  310", "CSE  312", "CSE  316", "CSE  320",
@@ -61,6 +69,8 @@ const FileUpload = () => {
     const ise_lower_divs = ["CSE  114", "CSE  214","ISE  218"]
     const ise_upper_divs = ["ISE  312", "ISE  305","ISE  316","ISE  320"]
     const ise_write_req = ["ISE  300"]
+    const ise_math = ["MAT  131", "MAT  132", "MAT  211", "AMS  151","AMS  161", "AMS  210", "AMS  310"]; 
+
 
     const be_core = ["ECO  108","ACC  210"]
     const be_supp1 = ["ACC  214","ESE  201","BUS  115","BUS  215","BUS  220","BUS  294"]
@@ -110,6 +120,22 @@ const FileUpload = () => {
     for(i = 0; i < data.docs.length; i++){
       deleteCollection("natural sciences", data.docs[i].id)
     }
+    data = await getDocs(ildCollectionRef);
+    for(i = 0; i < data.docs.length; i++){
+      deleteCollection("ise lower division", data.docs[i].id)
+    }
+    data = await getDocs(iudCollectionRef);
+    for(i = 0; i < data.docs.length; i++){
+      deleteCollection("ise upper division", data.docs[i].id)
+    }
+    data = await getDocs(iwrCollectionRef);
+    for(i = 0; i < data.docs.length; i++){
+      deleteCollection("ise write req", data.docs[i].id)
+    }
+    data = await getDocs(isemathCollectionRef);
+    for(i = 0; i < data.docs.length; i++){
+      deleteCollection("ise math req", data.docs[i].id)
+    }
   };
 
 
@@ -137,14 +163,11 @@ const FileUpload = () => {
       var s = "";
       for (var i = 0; i < lines.length; i++) {
         if(lines[i] === "Plan:Computer Science Major"){
-          setMajor("CSE")
           setIsCSE(true); 
           console.log("CSE")
         }
         if(lines[i] === "Plan:Information Systems Major"){
-          setMajor("ISE")
-     //     setIsCSE(false); 
-          console.log("ISE")
+          setIsCSE(false) 
         }
       }
       for (var i = 0; i < lines.length; i++) {
@@ -202,7 +225,6 @@ const FileUpload = () => {
               j++; 
             }
             var type = ""; 
-
             if(lower_divs.includes(course)){
               await addDoc(ldCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
               type = "Lower Division";
@@ -223,14 +245,20 @@ const FileUpload = () => {
               await addDoc(sciCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
               type = "Natural Science";
             }
-            else if(ise_lower_divs.includes(course)){
+            if(ise_lower_divs.includes(course)){
+              await addDoc(ildCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
               type = "ISE Lower Division";
             }
             else if(ise_upper_divs.includes(course)){
+              await addDoc(iudCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
               type = "ISE Upper Division";
             }
             else if(ise_write_req.includes(course)){
+              await addDoc(iwrCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
               type = "ISE Writing Req";
+            }
+            if(ise_math.includes(course)){
+              await addDoc(isemathCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
             }
            let data = {
             "course": course,
@@ -272,6 +300,15 @@ const FileUpload = () => {
       setMath(mathData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
       const natData = await getDocs(sciCollectionRef);
       setNatsci(natData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+
+      const ildData = await getDocs(ildCollectionRef);
+      setIld(ildData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      const iudData = await getDocs(iudCollectionRef);
+      setIud(iudData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      const iwrData = await getDocs(iwrCollectionRef);
+      setIwr(iwrData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      const imathData = await getDocs(isemathCollectionRef);
+      setImat(imathData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
     };
 
     getCourses();
@@ -302,7 +339,9 @@ const FileUpload = () => {
           className='btn btn-primary btn-block mt-4'
         />
       </form>
+      { isCSE ? (
       <Fragment>
+        CSE major
         <h3>Lower Division
         <table className="table mt-5 text-center"> 
         <thead>
@@ -429,6 +468,114 @@ const FileUpload = () => {
         </table>
         </h3>
         </Fragment>
+        
+      ) : (
+        <Fragment>
+        ISE Major
+        <h3>Lower Division
+        <table className="table mt-5 text-center"> 
+        <thead>
+        <tr>
+          <th>Course</th>
+          <th>Credits</th>
+          <th>Grade</th>
+          <th>Term</th>
+          <th>Year</th>
+        </tr>
+      </thead>
+      <tbody>
+      {ild.map(course => (
+          <tr key ={course.course}>
+            <td>{course.name}</td>
+            <td>{course.credits}</td>
+            <td>{course.grade}</td>
+            <td>{course.term}</td>
+            <td>{course.year}</td>
+              
+          </tr>
+      ))}
+      </tbody>
+        </table>
+        </h3>
+        <h3>Upper Division
+        <table className="table mt-5 text-center"> 
+        <thead>
+        <tr>
+          <th>Course</th>
+          <th>Credits</th>
+          <th>Grade</th>
+          <th>Term</th>
+          <th>Year</th>
+        </tr>
+      </thead>
+      <tbody>
+      {iud.map(course => (
+          <tr key ={course.course}>
+            <td>{course.name}</td>
+            <td>{course.credits}</td>
+            <td>{course.grade}</td>
+            <td>{course.term}</td>
+            <td>{course.year}</td>
+              
+          </tr>
+      ))}
+      </tbody>
+        </table>
+        </h3>
+        <h3>Math requirements
+        <table className="table mt-5 text-center"> 
+        <thead>
+        <tr>
+          <th>Course</th>
+          <th>Credits</th>
+          <th>Grade</th>
+          <th>Term</th>
+          <th>Year</th>
+        </tr>
+      </thead>
+      <tbody>
+      {imat.map(course => (
+          <tr key ={course.course}>
+            <td>{course.name}</td>
+            <td>{course.credits}</td>
+            <td>{course.grade}</td>
+            <td>{course.term}</td>
+            <td>{course.year}</td>
+              
+          </tr>
+      ))}
+      </tbody>
+        </table>
+        </h3>
+        <h3>Writing requirement
+        <table className="table mt-5 text-center"> 
+        <thead>
+        <tr>
+          <th>Course</th>
+          <th>Credits</th>
+          <th>Grade</th>
+          <th>Term</th>
+          <th>Year</th>
+        </tr>
+      </thead>
+      <tbody>
+      {iwr.map(course => (
+          <tr key ={course.course}>
+            <td>{course.name}</td>
+            <td>{course.credits}</td>
+            <td>{course.grade}</td>
+            <td>{course.term}</td>
+            <td>{course.year}</td>
+              
+          </tr>
+      ))}
+      </tbody>
+        </table>
+        </h3>
+
+        </Fragment>
+      )
+      } 
   
     </Fragment>
   );
