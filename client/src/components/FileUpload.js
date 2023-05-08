@@ -4,14 +4,17 @@ import Progress from './Progress';
 import axios from 'axios';
 import { db } from "./firebase-config";
 import {
+  
   collection,
   getDocs,
   addDoc,
   updateDoc,
   deleteDoc,
   doc,
+  firebase
 } from "firebase/firestore";
 
+//const firebase = require('firebase');
 
 const FileUpload = () => {
   const courses = [] // store course info without a database 
@@ -39,8 +42,6 @@ const FileUpload = () => {
   const teCollectionRef = collection(db, "technical electives");
   const mathCollectionRef = collection(db, "math");
   const sciCollectionRef = collection(db, "natural sciences");
-
-  
 
   const lower_divs = ["CSE  114", "CSE  214", "CSE  215", "CSE  216", "CSE  220"];
   const upper_divs = ["CSE  300", "CSE  303", "CSE  310", "CSE  312", "CSE  316", "CSE  320",
@@ -83,6 +84,33 @@ const FileUpload = () => {
   function is_numeric_char(c) { return /\d/.test(c); }
   function isLetter(str) { return str.length === 1 && str.match(/[a-z]/i); }
 
+  const deleteCollection = async (collection, id) => {
+    const userDoc = doc(db, collection, id);
+    await deleteDoc(userDoc);
+  };
+
+  const deleteCourses = async () => {
+    var data = await getDocs(ldCollectionRef);
+    for(var i = 0; i < data.docs.length; i++){
+      deleteCollection("lower division", data.docs[i].id)
+    }
+    data = await getDocs(udCollectionRef);
+    for(i = 0; i < data.docs.length; i++){
+      deleteCollection("upper division", data.docs[i].id)
+    }
+    data = await getDocs(teCollectionRef);
+    for(i = 0; i < data.docs.length; i++){
+      deleteCollection("technical electives", data.docs[i].id)
+    }
+    data = await getDocs(mathCollectionRef);
+    for(i = 0; i < data.docs.length; i++){
+      deleteCollection("math", data.docs[i].id)
+    }
+    data = await getDocs(sciCollectionRef);
+    for(i = 0; i < data.docs.length; i++){
+      deleteCollection("natural sciences", data.docs[i].id)
+    }
+  };
 
 
   const onChange = e => {
@@ -96,6 +124,9 @@ const FileUpload = () => {
     formData.append('file', file);
 
     try {
+
+      deleteCourses()
+
       await axios.delete('/postCourse')
       const res = await axios.post('/upload', formData)
       
