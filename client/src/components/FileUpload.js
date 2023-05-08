@@ -153,7 +153,6 @@ const FileUpload = () => {
 
       deleteCourses()
 
-      await axios.delete('/postCourse')
       const res = await axios.post('/upload', formData)
       
       let str = res.data;
@@ -260,15 +259,7 @@ const FileUpload = () => {
             if(ise_math.includes(course)){
               await addDoc(isemathCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
             }
-           let data = {
-            "course": course,
-            "credits": credits,
-            "grade": grade, 
-            "term": season,
-            "year": year,
-            "type":type
-           }
-           axios.post("http://localhost:5000/postCourse",data); 
+
           }
         }
       }
