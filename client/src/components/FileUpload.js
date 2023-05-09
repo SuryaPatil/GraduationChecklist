@@ -188,7 +188,7 @@ const FileUpload = () => {
       var s = "";
       for (var i = 0; i < lines.length; i++) {
         if(lines[i] === "Plan:Computer Science Major"){
-        //  setIsCSE(true); 
+          setIsCSE(true); 
           console.log("CSE")
         }
         if(lines[i] === "Plan:Information Systems Major"){
