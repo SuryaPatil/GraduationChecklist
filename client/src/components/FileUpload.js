@@ -38,7 +38,7 @@ const FileUpload = () => {
   const [fis, setFis] = useState([])
   const [hi, setHi] = useState([])
   const [sna, setSna] = useState([])
-  const [ism, seTsm] = useState([])
+  const [tsm, setTsm] = useState([])
 
   const ldCollectionRef = collection(db, "lower division");
   const udCollectionRef = collection(db, "upper division");
@@ -50,6 +50,12 @@ const FileUpload = () => {
   const iudCollectionRef = collection(db, "ise upper division");
   const iwrCollectionRef = collection(db, "ise write req");
   const isemathCollectionRef = collection(db, "ise math req");
+
+  const beCollectionRef = collection(db, "business economics");
+  const fisCollectionRef = collection(db, "financial information systems");
+  const hiCollectionRef = collection(db, "health informatics");
+  const snaCollectionRef = collection(db, "systems and network admin");
+  const tsmCollectionRef = collection(db, "tech systems management");
 
   const lower_divs = ["CSE  114", "CSE  214", "CSE  215", "CSE  216", "CSE  220"];
   const upper_divs = ["CSE  300", "CSE  303", "CSE  310", "CSE  312", "CSE  316", "CSE  320",
@@ -70,7 +76,6 @@ const FileUpload = () => {
     const ise_upper_divs = ["ISE  312", "ISE  305","ISE  316","ISE  320"]
     const ise_write_req = ["ISE  300"]
     const ise_math = ["MAT  131", "MAT  132", "MAT  211", "AMS  151","AMS  161", "AMS  210", "AMS  310"]; 
-
 
     const be_core = ["ECO  108","ACC  210"]
     const be_supp1 = ["ACC  214","ESE  201","BUS  115","BUS  215","BUS  220","BUS  294"]
@@ -136,6 +141,27 @@ const FileUpload = () => {
     for(i = 0; i < data.docs.length; i++){
       deleteCollection("ise math req", data.docs[i].id)
     }
+
+    data = await getDocs(beCollectionRef);
+    for(i = 0; i < data.docs.length; i++){
+      deleteCollection("business economics", data.docs[i].id)
+    }
+    data = await getDocs(fisCollectionRef);
+    for(i = 0; i < data.docs.length; i++){
+      deleteCollection("financial information systems", data.docs[i].id)
+    }
+    data = await getDocs(hiCollectionRef);
+    for(i = 0; i < data.docs.length; i++){
+      deleteCollection("health informatics", data.docs[i].id)
+    }
+    data = await getDocs(snaCollectionRef);
+    for(i = 0; i < data.docs.length; i++){
+      deleteCollection("systems and network admin", data.docs[i].id)
+    }
+    data = await getDocs(tsmCollectionRef);
+    for(i = 0; i < data.docs.length; i++){
+      deleteCollection("tech systems management", data.docs[i].id)
+    }
   };
 
 
@@ -162,7 +188,7 @@ const FileUpload = () => {
       var s = "";
       for (var i = 0; i < lines.length; i++) {
         if(lines[i] === "Plan:Computer Science Major"){
-          setIsCSE(true); 
+        //  setIsCSE(true); 
           console.log("CSE")
         }
         if(lines[i] === "Plan:Information Systems Major"){
@@ -244,6 +270,7 @@ const FileUpload = () => {
               await addDoc(sciCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
               type = "Natural Science";
             }
+
             if(ise_lower_divs.includes(course)){
               await addDoc(ildCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
               type = "ISE Lower Division";
@@ -258,8 +285,24 @@ const FileUpload = () => {
             }
             if(ise_math.includes(course)){
               await addDoc(isemathCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
+              type = "ISE Lower Division";
             }
 
+            if(be_core.includes(course) || be_supp1.includes(course) || be_supp2.includes(course)){
+              await addDoc(beCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
+            }
+            if(fis_core.includes(course) || fis_supp.includes(course)){
+              await addDoc(fisCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
+            }
+            if(hi_core.includes(course) || hi_supp.includes(course)){
+              await addDoc(hiCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
+            }
+            if(sna_core.includes(course) || sna_supp.includes(course)){
+              await addDoc(snaCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
+            }
+            if(tsm_core.includes(course) || tsm_supp.includes(course)){
+              await addDoc(tsmCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
+            }
           }
         }
       }
@@ -300,11 +343,21 @@ const FileUpload = () => {
       setIwr(iwrData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
       const imathData = await getDocs(isemathCollectionRef);
       setImat(imathData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+
+      const beData = await getDocs(beCollectionRef);
+      setBe(beData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      const fisData = await getDocs(fisCollectionRef);
+      setFis(fisData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      const hiData = await getDocs(hiCollectionRef);
+      setHi(hiData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      const snaData = await getDocs(snaCollectionRef);
+      setSna(snaData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      const tsmData = await getDocs(tsmCollectionRef);
+      setTsm(tsmData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
     };
 
     getCourses();
 },[]);
-
 
   return (
     <Fragment>
@@ -551,6 +604,133 @@ const FileUpload = () => {
       </thead>
       <tbody>
       {iwr.map(course => (
+          <tr key ={course.course}>
+            <td>{course.name}</td>
+            <td>{course.credits}</td>
+            <td>{course.grade}</td>
+            <td>{course.term}</td>
+            <td>{course.year}</td>
+              
+          </tr>
+      ))}
+      </tbody>
+        </table>
+        </h3>
+        <h3>Specialization in Business Economics
+        <table className="table mt-5 text-center"> 
+        <thead>
+        <tr>
+          <th>Course</th>
+          <th>Credits</th>
+          <th>Grade</th>
+          <th>Term</th>
+          <th>Year</th>
+        </tr>
+      </thead>
+      <tbody>
+      {be.map(course => (
+          <tr key ={course.course}>
+            <td>{course.name}</td>
+            <td>{course.credits}</td>
+            <td>{course.grade}</td>
+            <td>{course.term}</td>
+            <td>{course.year}</td>
+              
+          </tr>
+      ))}
+      </tbody>
+        </table>
+        </h3>
+        <h3>Specialization in Health Informatics
+        <table className="table mt-5 text-center"> 
+        <thead>
+        <tr>
+          <th>Course</th>
+          <th>Credits</th>
+          <th>Grade</th>
+          <th>Term</th>
+          <th>Year</th>
+        </tr>
+      </thead>
+      <tbody>
+      {hi.map(course => (
+          <tr key ={course.course}>
+            <td>{course.name}</td>
+            <td>{course.credits}</td>
+            <td>{course.grade}</td>
+            <td>{course.term}</td>
+            <td>{course.year}</td>
+              
+          </tr>
+      ))}
+      </tbody>
+        </table>
+        </h3>
+        <h3>Specialization in Systems and Network Administration
+        <table className="table mt-5 text-center"> 
+        <thead>
+        <tr>
+          <th>Course</th>
+          <th>Credits</th>
+          <th>Grade</th>
+          <th>Term</th>
+          <th>Year</th>
+        </tr>
+      </thead>
+      <tbody>
+      {sna.map(course => (
+          <tr key ={course.course}>
+            <td>{course.name}</td>
+            <td>{course.credits}</td>
+            <td>{course.grade}</td>
+            <td>{course.term}</td>
+            <td>{course.year}</td>
+              
+          </tr>
+      ))}
+      </tbody>
+        </table>
+        </h3>
+
+        <h3>Specialization in Financial Information Systems
+        <table className="table mt-5 text-center"> 
+        <thead>
+        <tr>
+          <th>Course</th>
+          <th>Credits</th>
+          <th>Grade</th>
+          <th>Term</th>
+          <th>Year</th>
+        </tr>
+      </thead>
+      <tbody>
+      {fis.map(course => (
+          <tr key ={course.course}>
+            <td>{course.name}</td>
+            <td>{course.credits}</td>
+            <td>{course.grade}</td>
+            <td>{course.term}</td>
+            <td>{course.year}</td>
+              
+          </tr>
+      ))}
+      </tbody>
+        </table>
+        </h3>
+
+        <h3>Specialization in Technological Systems Management
+        <table className="table mt-5 text-center"> 
+        <thead>
+        <tr>
+          <th>Course</th>
+          <th>Credits</th>
+          <th>Grade</th>
+          <th>Term</th>
+          <th>Year</th>
+        </tr>
+      </thead>
+      <tbody>
+      {tsm.map(course => (
           <tr key ={course.course}>
             <td>{course.name}</td>
             <td>{course.credits}</td>

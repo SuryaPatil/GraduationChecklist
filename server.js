@@ -3,8 +3,6 @@ const fileUpload = require('express-fileupload');
 const pdfParse = require("pdf-parse"); 
 const cors = require("cors"); 
 const { Buffer } = require("node:buffer");
-const pool = require("./db");
-const pdf2base64 = require('pdf-to-base64');
 
 
 const app = express();
