@@ -8,6 +8,7 @@ import {
   getDocs,
   addDoc,
   deleteDoc,
+  updateDoc,
   doc,
 } from "firebase/firestore";
 
@@ -170,6 +171,44 @@ const FileUpload = () => {
     }
   };
 
+  /**
+   * Checks if a given course is already in a given collection
+   * @param {*} collection 
+   * @param {*} name 
+   * @returns index of the existing doc in data.docs if the name is in the given collection, -1 otherwise
+   */
+  const checkDup = async (collection, name) => {
+    var data = await getDocs(collection);
+    for(var i = 0; i < data.docs.length; i++){
+      const doc = data.docs[i];
+      const doc_name = doc.get('name'); 
+    //  console.log(`course: ${doc.get('name')}`); 
+      if(name === doc_name ){
+        return i; 
+      }
+    }
+    return -1; 
+  }
+
+  const addCourse = async (collection, data, name) => {
+
+    const i = checkDup(collection, name);
+  //  console.log(`collection: ${collection}`)
+   // console.log(`data: ${data}`)
+
+    if(i !== -1){
+      console.log("adding doc");
+      await addDoc(collection, data);
+    }
+    else{
+      var data = await getDocs(collection);
+      console.log("updating doc")
+      const doc = data.docs[i] // get the current doc using return value from checkDup 
+      await updateDoc(doc, data)
+    }
+
+  }
+
 
   const onChange = e => {
     setFile(e.target.files[0]);
@@ -270,59 +309,50 @@ const FileUpload = () => {
               season += s[j];
               j++; 
             }
-            var type = ""; 
+            const data = { name: course, credits: Number(credits), grade: grade, term: season, year: year }
             if(lower_divs.includes(course)){
-              await addDoc(ldCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
-              type = "Lower Division";
+              await addCourse(ldCollectionRef, data, course);
             }
             else if(upper_divs.includes(course)){
-              await addDoc(udCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
-              type = "Upper Division";
+              await addCourse(udCollectionRef, data, course);
             }
             else if(math_reqs.includes(course)){
-              await addDoc(mathCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
-              type = "Math Requirement";
+              await addCourse(mathCollectionRef, data, course);
             }
             else if(tech_electives.includes(course)){
-              await addDoc(teCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
-              type = "Technical Elective";
+              await addCourse(teCollectionRef, data, course);
             }
             else if(nat_sci.includes(course)){
-              await addDoc(sciCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
-              type = "Natural Science";
+              await addCourse(sciCollectionRef, data, course);
             }
 
             if(ise_lower_divs.includes(course)){
-              await addDoc(ildCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
-              type = "ISE Lower Division";
+              await addCourse(ildCollectionRef, data, course);
             }
             else if(ise_upper_divs.includes(course)){
-              await addDoc(iudCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
-              type = "ISE Upper Division";
+              await addCourse(iudCollectionRef, data, course);
             }
             else if(ise_write_req.includes(course)){
-              await addDoc(iwrCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
-              type = "ISE Writing Req";
+              await addCourse(iwrCollectionRef, data, course);
             }
             if(ise_math.includes(course)){
-              await addDoc(isemathCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
-              type = "ISE Lower Division";
+              await addCourse(isemathCollectionRef, data, course);
             }
 
             if(be_core.includes(course) || be_supp1.includes(course) || be_supp2.includes(course)){
-              await addDoc(beCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
+              await addCourse(beCollectionRef, data, course);
             }
             if(fis_core.includes(course) || fis_supp.includes(course)){
-              await addDoc(fisCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
+              await addCourse(fisCollectionRef, data, course);
             }
             if(hi_core.includes(course) || hi_supp.includes(course)){
-              await addDoc(hiCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
+              await addCourse(hiCollectionRef, data, course);
             }
             if(sna_core.includes(course) || sna_supp.includes(course)){
-              await addDoc(snaCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
+              await addCourse(snaCollectionRef, data, course);
             }
             if(tsm_core.includes(course) || tsm_supp.includes(course)){
-              await addDoc(tsmCollectionRef, { name: course, credits: Number(credits), grade: grade, term: season, year: year });
+              await addCourse(tsmCollectionRef, data, course);
             }
           }
         }
