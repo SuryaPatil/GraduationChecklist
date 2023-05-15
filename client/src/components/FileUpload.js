@@ -4,7 +4,6 @@ import Progress from './Progress';
 import axios from 'axios';
 import { db } from "./firebase-config";
 import {
-  
   collection,
   getDocs,
   addDoc,
@@ -22,6 +21,13 @@ const FileUpload = () => {
   const [uploadPercentage, setUploadPercentage] = useState(0);
 
   const [isCSE, setIsCSE] = useState(false); 
+
+  // specialization states
+  const [isBe, setIsBe] = useState(false) 
+  const [isHi, setIsHi] = useState(false) 
+  const [isSna, setIsSna] = useState(false) 
+  const [isFis, setIsFis] = useState(false) 
+  const [isTsm, setIsTsm] = useState(false) 
 
   //const [courses, setCourses] = useState([]);
   const [ld, setLd] = useState([]); // lower division courses
@@ -194,6 +200,21 @@ const FileUpload = () => {
         if(lines[i] === "Plan:Information Systems Major"){
           setIsCSE(false) 
         }
+        if(lines[i] === "Plan: System and Network Administration Specialization"){
+          setIsSna(true)
+        }
+        if(lines[i] === "Plan: Business Economics Specialization"){
+          setIsBe(true)
+        }
+        if(lines[i] === "Plan: Health Informatics Specialization"){
+          setIsHi(true)
+        }
+        if(lines[i] === "Plan: Technological Systems Management Specialization"){
+          setIsTsm(true)
+        }
+        if(lines[i] === "Plan: Financial Information Systems Specialization"){
+          setIsFis(true)
+        }
       }
       for (var i = 0; i < lines.length; i++) {
 
@@ -307,10 +328,6 @@ const FileUpload = () => {
         }
       }
       let k = 0
-      while(k < courses.length){
-      //  console.log(courses[k].toString())
-        k++
-      }
       setMessage('File Uploaded'); 
     } catch (err) {
       if (err.response.status === 500) {
@@ -616,82 +633,91 @@ const FileUpload = () => {
       </tbody>
         </table>
         </h3>
-        <h3>Specialization in Business Economics
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {be.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
+        { isBe ? ( 
+          <h3>Specialization in Business Economics
+          <table className="table mt-5 text-center"> 
+          <thead>
+          <tr>
+            <th>Course</th>
+            <th>Credits</th>
+            <th>Grade</th>
+            <th>Term</th>
+            <th>Year</th>
           </tr>
-      ))}
-      </tbody>
-        </table>
-        </h3>
-        <h3>Specialization in Health Informatics
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {hi.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
+        </thead>
+        <tbody>
+        {be.map(course => (
+            <tr key ={course.course}>
+              <td>{course.name}</td>
+              <td>{course.credits}</td>
+              <td>{course.grade}</td>
+              <td>{course.term}</td>
+              <td>{course.year}</td>
+                
+            </tr>
+        ))}
+        </tbody>
+          </table>
+          </h3>
+        ) : (<div></div>)
+      }
+        { isHi ? ( 
+          <h3>Specialization in Health Informatics
+          <table className="table mt-5 text-center"> 
+          <thead>
+          <tr>
+            <th>Course</th>
+            <th>Credits</th>
+            <th>Grade</th>
+            <th>Term</th>
+            <th>Year</th>
           </tr>
-      ))}
-      </tbody>
-        </table>
-        </h3>
-        <h3>Specialization in Systems and Network Administration
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {sna.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
+        </thead>
+        <tbody>
+        {hi.map(course => (
+            <tr key ={course.course}>
+              <td>{course.name}</td>
+              <td>{course.credits}</td>
+              <td>{course.grade}</td>
+              <td>{course.term}</td>
+              <td>{course.year}</td>
+                
+            </tr>
+        ))}
+        </tbody>
+          </table>
+          </h3>
+          ) : (<div></div>)
+      }
+      { isSna ? ( 
+          <h3>Specialization in Systems and Network Administration
+          <table className="table mt-5 text-center"> 
+          <thead>
+          <tr>
+            <th>Course</th>
+            <th>Credits</th>
+            <th>Grade</th>
+            <th>Term</th>
+            <th>Year</th>
           </tr>
-      ))}
-      </tbody>
-        </table>
-        </h3>
-
+        </thead>
+        <tbody>
+        {sna.map(course => (
+            <tr key ={course.course}>
+              <td>{course.name}</td>
+              <td>{course.credits}</td>
+              <td>{course.grade}</td>
+              <td>{course.term}</td>
+              <td>{course.year}</td>
+                
+            </tr>
+        ))}
+        </tbody>
+          </table>
+          </h3>
+        ) : (<div></div>)
+      }
+      { isFis ? ( 
         <h3>Specialization in Financial Information Systems
         <table className="table mt-5 text-center"> 
         <thead>
@@ -718,6 +744,10 @@ const FileUpload = () => {
         </table>
         </h3>
 
+        ) : (<div></div>)
+      }
+
+      { isTsm ? ( 
         <h3>Specialization in Technological Systems Management
         <table className="table mt-5 text-center"> 
         <thead>
@@ -743,7 +773,8 @@ const FileUpload = () => {
       </tbody>
         </table>
         </h3>
-
+        ) : (<div></div>)
+      }
         </Fragment>
       )
       } 
