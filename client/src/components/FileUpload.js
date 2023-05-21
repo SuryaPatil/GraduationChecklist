@@ -183,7 +183,7 @@ const FileUpload = () => {
       const doc = data.docs[i];
       const doc_name = doc.get('name'); 
     //  console.log(`course: ${doc.get('name')}`); 
-      if(name === doc_name ){
+      if(name === doc_name){
         return i; 
       }
     }
@@ -239,19 +239,19 @@ const FileUpload = () => {
         if(lines[i] === "Plan:Information Systems Major"){
           setIsCSE(false) 
         }
-        if(lines[i] === "Plan: System and Network Administration Specialization"){
+        if(lines[i] === "Plan:System and Network Administration Specialization"){
           setIsSna(true)
         }
-        if(lines[i] === "Plan: Business Economics Specialization"){
+        if(lines[i] === "Plan:Business Economics Specialization"){
           setIsBe(true)
         }
-        if(lines[i] === "Plan: Health Informatics Specialization"){
+        if(lines[i] === "Plan:Health Informatics Specialization"){
           setIsHi(true)
         }
-        if(lines[i] === "Plan: Technological Systems Management Specialization"){
+        if(lines[i] === "Plan:Technological Systems Management Specialization"){
           setIsTsm(true)
         }
-        if(lines[i] === "Plan: Financial Information Systems Specialization"){
+        if(lines[i] === "Plan:Financial Information Systems Specialization"){
           setIsFis(true)
         }
       }
