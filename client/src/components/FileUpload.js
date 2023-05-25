@@ -22,6 +22,9 @@ const FileUpload = () => {
   const [uploadPercentage, setUploadPercentage] = useState(0);
 
   const [isCSE, setIsCSE] = useState(false); 
+  const [name, setName] = useState("")
+  const [id, setId] = useState(id) 
+  var foundName = false; 
 
   // specialization states
   const [isBe, setIsBe] = useState(false) 
@@ -72,7 +75,11 @@ const FileUpload = () => {
                           "CSE  328","CSE  331","CSE  332","CSE  333","CSE  334","CSE  336","CSE  337",
                           "CSE  351","CSE  352","CSE  353","CSE  354","CSE  355","CSE  356","CSE  360",
                             "CSE  361","CSE  362","CSE  363","CSE  364","CSE  366","CSE  370","CSE  376",
-                            "CSE  377","CSE  380","CSE  381","CSE  487","CSE  488"]
+                            "CSE  377","CSE  380","CSE  381","CSE  487","CSE  390","CSE  488",
+                            "ISE  300","ISE  305", "ISE  311", "ISE  316", "ISE  317", "ISE  320", "ISE  321", "ISE  323",
+                            "ISE  331","ISE  332","ISE  333","ISE  334","ISE  337","ISE  339","ISE  340","ISE  364", "ISE  377",
+                            "ISE  377","ISE  378","ISE  390","ISE  391","ISE  392","ISE  487","ISE  488",]
+
     const nat_sci = ["AST  203", "AST  205",
     "BIO  201","BIO  204","BIO  202","BIO  203",
     "CHE  131","CHE  133","CHE  132","CHE  152","CHE  154","CHE  321","CHE  322","CHE  322","CHE  331","CHE  332",
@@ -83,6 +90,7 @@ const FileUpload = () => {
     const ise_upper_divs = ["ISE  312", "ISE  305","ISE  316","ISE  320"]
     const ise_write_req = ["ISE  300"]
     const ise_math = ["MAT  131", "MAT  132", "MAT  211", "AMS  151","AMS  161", "AMS  210", "AMS  310"]; 
+
 
     const be_core = ["ECO  108","ACC  210"]
     const be_supp1 = ["ACC  214","ESE  201","BUS  115","BUS  215","BUS  220","BUS  294"]
@@ -182,7 +190,6 @@ const FileUpload = () => {
     for(var i = 0; i < data.docs.length; i++){
       const doc = data.docs[i];
       const doc_name = doc.get('name'); 
-    //  console.log(`course: ${doc.get('name')}`); 
       if(name === doc_name){
         return i; 
       }
@@ -197,7 +204,7 @@ const FileUpload = () => {
    // console.log(`data: ${data}`)
 
     if(i !== -1){
-      console.log("adding doc");
+    //  console.log("adding doc");
       await addDoc(collection, data);
     }
     else{
@@ -227,11 +234,11 @@ const FileUpload = () => {
       const res = await axios.post('/upload', formData)
       
       let str = res.data;
-
       const splitLines = str => str.split(/\r?\n/);
       const lines = splitLines(str);
       var s = "";
       for (var i = 0; i < lines.length; i++) {
+
         if(lines[i] === "Plan:Computer Science Major"){
           setIsCSE(true); 
           console.log("CSE")
@@ -255,6 +262,42 @@ const FileUpload = () => {
           setIsFis(true)
         }
       }
+
+      for(i = 0; i < lines.length;i++){
+        var b = lines[i].substring(0,4);
+        if(b === "Name"){
+          let j = i + 2;
+          while(lines[i][j] === " "){
+            j++; 
+          }
+          console.log(foundName)
+          if(foundName === false){
+            console.log(lines[i].substring(j)); 
+            let name = lines[i].substring(j);
+            setName(name)
+            break;
+          }
+        }
+      }
+
+      for(i = 0; i < lines.length;i++){
+        b = lines[i].substring(0,7);
+        console.log(b)
+        if(b === "Student"){
+          let j = i + 5;
+          while(!is_numeric_char(lines[i][j])){
+            j++; 
+          }
+          console.log(lines[i].substring(j)); 
+          let id = lines[i].substring(j);
+          setId(id)
+          
+          break;
+          
+        }
+      }
+
+
       for (var i = 0; i < lines.length; i++) {
 
             var b = "";
@@ -430,6 +473,8 @@ const FileUpload = () => {
           className='btn btn-primary btn-block mt-4'
         />
       </form>
+      <h3>Name: {name}</h3>
+      <h3>Id: {id}</h3>
       { isCSE ? (
       <Fragment>
         CSE major
@@ -651,6 +696,31 @@ const FileUpload = () => {
       </thead>
       <tbody>
       {iwr.map(course => (
+          <tr key ={course.course}>
+            <td>{course.name}</td>
+            <td>{course.credits}</td>
+            <td>{course.grade}</td>
+            <td>{course.term}</td>
+            <td>{course.year}</td>
+              
+          </tr>
+      ))}
+      </tbody>
+        </table>
+        </h3>
+        <h3>Technical Electives
+        <table className="table mt-5 text-center"> 
+        <thead>
+        <tr>
+          <th>Course</th>
+          <th>Credits</th>
+          <th>Grade</th>
+          <th>Term</th>
+          <th>Year</th>
+        </tr>
+      </thead>
+      <tbody>
+      {te.map(course => (
           <tr key ={course.course}>
             <td>{course.name}</td>
             <td>{course.credits}</td>
