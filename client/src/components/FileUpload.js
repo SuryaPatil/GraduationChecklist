@@ -44,6 +44,7 @@ const FileUpload = () => {
   const [iud, setIud] = useState([]) // ISE upper division courses
   const [iwr, setIwr] = useState([]) // ISE writing requirement 
   const [imat, setImat] = useState([]) // ISE writing requirement 
+  const [isete, setIseTe] = useState([])
   const [be, setBe] = useState([])
   const [fis, setFis] = useState([])
   const [hi, setHi] = useState([])
@@ -60,6 +61,7 @@ const FileUpload = () => {
   const iudCollectionRef = collection(db, "ise upper division");
   const iwrCollectionRef = collection(db, "ise write req");
   const isemathCollectionRef = collection(db, "ise math req");
+  const iseteCollectionRef = collection(db, "ise technical electives") 
 
   const beCollectionRef = collection(db, "business economics");
   const fisCollectionRef = collection(db, "financial information systems");
@@ -76,9 +78,7 @@ const FileUpload = () => {
                           "CSE  351","CSE  352","CSE  353","CSE  354","CSE  355","CSE  356","CSE  360",
                             "CSE  361","CSE  362","CSE  363","CSE  364","CSE  366","CSE  370","CSE  376",
                             "CSE  377","CSE  380","CSE  381","CSE  487","CSE  390","CSE  488",
-                            "ISE  300","ISE  305", "ISE  311", "ISE  316", "ISE  317", "ISE  320", "ISE  321", "ISE  323",
-                            "ISE  331","ISE  332","ISE  333","ISE  334","ISE  337","ISE  339","ISE  340","ISE  364", "ISE  377",
-                            "ISE  377","ISE  378","ISE  390","ISE  391","ISE  392","ISE  487","ISE  488",]
+                            ]
 
     const nat_sci = ["AST  203", "AST  205",
     "BIO  201","BIO  204","BIO  202","BIO  203",
@@ -90,6 +90,9 @@ const FileUpload = () => {
     const ise_upper_divs = ["ISE  312", "ISE  305","ISE  316","ISE  320"]
     const ise_write_req = ["ISE  300"]
     const ise_math = ["MAT  131", "MAT  132", "MAT  211", "AMS  151","AMS  161", "AMS  210", "AMS  310"]; 
+    const ise_tech_electives = ["ISE  316", "ISE  317", "ISE  320", "ISE  323",
+                            "ISE  332","ISE  333","ISE  334", "ISE  339","ISE  340","ISE  364", "ISE  377",
+                            "ISE  377","ISE  378","ISE  390","ISE  391","ISE  392","ISE  487", "ISE  488"]
 
 
     const be_core = ["ECO  108","ACC  210"]
@@ -155,6 +158,10 @@ const FileUpload = () => {
     data = await getDocs(isemathCollectionRef);
     for(i = 0; i < data.docs.length; i++){
       deleteCollection("ise math req", data.docs[i].id)
+    }
+    data = await getDocs(iseteCollectionRef);
+    for(i = 0; i < data.docs.length; i++){
+      deleteCollection("ise technical electives", data.docs[i].id)
     }
 
     data = await getDocs(beCollectionRef);
@@ -315,7 +322,7 @@ const FileUpload = () => {
           || math_reqs.includes(course) || nat_sci.includes(course) || ise_lower_divs.includes(course) ||
           ise_upper_divs.includes(course) || ise_write_req.includes(course) || be_core.includes(course) || 
           be_supp1.includes(course) || be_supp2.includes(course) || fis_core.includes(course) ||
-          fis_supp.includes(course) || hi_core.includes(course) || hi_supp.includes(course) || 
+          fis_supp.includes(course) || hi_core.includes(course) || hi_supp.includes(course) || ise_tech_electives.includes(course) ||
           sna_core.includes(course) || sna_supp.includes(course) || tsm_core.includes(course) || tsm_supp.includes(course)){
 
        
@@ -381,6 +388,9 @@ const FileUpload = () => {
             if(ise_math.includes(course)){
               await addCourse(isemathCollectionRef, data, course);
             }
+            if(ise_tech_electives.includes(course)){
+              await addCourse(iseteCollectionRef, data, course);
+            }
 
             if(be_core.includes(course) || be_supp1.includes(course) || be_supp2.includes(course)){
               await addCourse(beCollectionRef, data, course);
@@ -433,6 +443,8 @@ const FileUpload = () => {
       setIwr(iwrData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
       const imathData = await getDocs(isemathCollectionRef);
       setImat(imathData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      const iseteData = await getDocs(iseteCollectionRef);
+      setIseTe(iseteData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
 
       const beData = await getDocs(beCollectionRef);
       setBe(beData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
@@ -720,7 +732,7 @@ const FileUpload = () => {
         </tr>
       </thead>
       <tbody>
-      {te.map(course => (
+      {isete.map(course => (
           <tr key ={course.course}>
             <td>{course.name}</td>
             <td>{course.credits}</td>
