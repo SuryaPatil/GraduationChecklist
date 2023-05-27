@@ -33,6 +33,9 @@ const FileUpload = () => {
   const [isFis, setIsFis] = useState(false) 
   const [isTsm, setIsTsm] = useState(false) 
 
+  let isSnaVar = false
+  let isFisVar = false
+
   //const [courses, setCourses] = useState([]);
   const [ld, setLd] = useState([]); // lower division courses
   const [ud, setUd] = useState([]); // upper division courses
@@ -90,9 +93,14 @@ const FileUpload = () => {
     const ise_upper_divs = ["ISE  312", "ISE  305","ISE  316","ISE  320"]
     const ise_write_req = ["ISE  300"]
     const ise_math = ["MAT  131", "MAT  132", "MAT  211", "AMS  151","AMS  161", "AMS  210", "AMS  310"]; 
-    const ise_tech_electives = ["ISE  316", "ISE  317", "ISE  320", "ISE  323",
+    const ise_tech_electives = ["ISE  316", "ISE  317", "ISE  323",
                             "ISE  332","ISE  333","ISE  334", "ISE  339","ISE  340","ISE  364", "ISE  377",
-                            "ISE  377","ISE  378","ISE  390","ISE  391","ISE  392","ISE  487", "ISE  488"]
+                            "ISE  377","ISE  378","ISE  390","ISE  391","ISE  392","ISE  487", "ISE  488",
+                            "CSE 304", "CSE  305","CSE  306","CSE  307","CSE  311","CSE  323","CSE  327",
+                          "CSE  328","CSE  331","CSE  332","CSE  333","CSE  334","CSE  336","CSE  337",
+                          "CSE  351","CSE  352","CSE  353","CSE  354","CSE  355","CSE  356","CSE  360",
+                            "CSE  361","CSE  362","CSE  363","CSE  364","CSE  366","CSE  370","CSE  376",
+                            "CSE  377","CSE  380","CSE  381","CSE  487","CSE  390","CSE  488",]
 
 
     const be_core = ["ECO  108","ACC  210"]
@@ -255,6 +263,7 @@ const FileUpload = () => {
         }
         if(lines[i] === "Plan:System and Network Administration Specialization"){
           setIsSna(true)
+          isSnaVar = true
         }
         if(lines[i] === "Plan:Business Economics Specialization"){
           setIsBe(true)
@@ -267,8 +276,12 @@ const FileUpload = () => {
         }
         if(lines[i] === "Plan:Financial Information Systems Specialization"){
           setIsFis(true)
+          isFisVar = true
         }
       }
+
+      isSnaVar = true
+      console.log(isSnaVar)
 
       for(i = 0; i < lines.length;i++){
         var b = lines[i].substring(0,4);
@@ -389,7 +402,18 @@ const FileUpload = () => {
               await addCourse(isemathCollectionRef, data, course);
             }
             if(ise_tech_electives.includes(course)){
-              await addCourse(iseteCollectionRef, data, course);
+
+              /* Check if the course should be listed as a specialization or as an elective */
+              if(fis_supp.includes(course) && isFisVar === true){
+                await addCourse(fisCollectionRef, data, course);
+              }
+              else if(sna_core.includes(course) && isSnaVar === true){
+                await addCourse(snaCollectionRef, data, course);
+              }
+              else{
+                await addCourse(iseteCollectionRef, data, course);
+              }
+              
             }
 
             if(be_core.includes(course) || be_supp1.includes(course) || be_supp2.includes(course)){
