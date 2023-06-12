@@ -1,12 +1,14 @@
 import React, { Fragment, useState,useEffect } from 'react';
 import Message from './Message';
 import Progress from './Progress';
+import Table from './table'
 import axios from 'axios';
-import { db } from "./firebase-config";
+import {db} from "./firebase-config"
 import {
   collection,
   getDocs,
   addDoc,
+  getDoc,
   deleteDoc,
   updateDoc,
   doc,
@@ -15,7 +17,6 @@ import {
 //const firebase = require('firebase');
 
 const FileUpload = () => {
-  const courses = [] // store course info without a database 
   const [file, setFile] = useState('');
   const [filename, setFilename] = useState('Choose File');
   const [message, setMessage] = useState('');
@@ -37,46 +38,37 @@ const FileUpload = () => {
   let isFisVar = false
 
   //const [courses, setCourses] = useState([]);
-  const [ld, setLd] = useState([]); // lower division courses
-  const [ud, setUd] = useState([]); // upper division courses
-  const [te, setTe] = useState([]); // technical electives
-  const [math,setMath] = useState([]) // math courses
-  const [natsci, setNatsci] = useState([]); // natural science courses
-  
-  const [ild, setIld] = useState([]) // ISE lower division courses
-  const [iud, setIud] = useState([]) // ISE upper division courses
-  const [iwr, setIwr] = useState([]) // ISE writing requirement 
-  const [imat, setImat] = useState([]) // ISE writing requirement 
-  const [isete, setIseTe] = useState([])
-  const [be, setBe] = useState([])
-  const [fis, setFis] = useState([])
-  const [hi, setHi] = useState([])
-  const [sna, setSna] = useState([])
-  const [tsm, setTsm] = useState([])
+  const [CSEUD, setCSEUD] = useState([]); // upper division courses
+  const [CSELD, setCSELD] = useState([]); // lower division courses
+  const [CSEMath, setCSEMath] = useState([]);
+  const [CSETE, setCSETE] = useState([])
+  const [sci, setSci] = useState([])
 
-  const ldCollectionRef = collection(db, "lower division");
-  const udCollectionRef = collection(db, "upper division");
-  const teCollectionRef = collection(db, "technical electives");
-  const mathCollectionRef = collection(db, "math");
-  const sciCollectionRef = collection(db, "natural sciences");
+  const [ISEUD, setISEUD] = useState([])
+  const [ISELD, setISELD] = useState([])
 
-  const ildCollectionRef = collection(db, "ise lower division");
-  const iudCollectionRef = collection(db, "ise upper division");
-  const iwrCollectionRef = collection(db, "ise write req");
-  const isemathCollectionRef = collection(db, "ise math req");
-  const iseteCollectionRef = collection(db, "ise technical electives") 
+  /* ISE specializations */
 
-  const beCollectionRef = collection(db, "business economics");
-  const fisCollectionRef = collection(db, "financial information systems");
-  const hiCollectionRef = collection(db, "health informatics");
-  const snaCollectionRef = collection(db, "systems and network admin");
-  const tsmCollectionRef = collection(db, "tech systems management");
+  const [SNA, setSNA] = useState([])
+
+  const infoRef = collection(db, "Student Info")
+  const CSEUDRef = collection(db, "cse upper division");
+  const CSELDRef = collection(db, "cse lower division");
+  const CSEMathRef = collection(db, "cse math");
+  const CSETERef = collection(db, "cse technical electives");
+  const sciRef = collection(db, "science")
+  const ISELDRef = collection(db, "ise lower division");
+  const ISEUDRef = collection(db, "ise upper division");
+  const SNARef = collection(db, "systems and network admin");
+
+  var num_cse_electives = 0 // how many cse technical electives the student has taken
+  var num_sci = 0
 
   const lower_divs = ["CSE  114", "CSE  214", "CSE  215", "CSE  216", "CSE  220"];
   const upper_divs = ["CSE  300", "CSE  303", "CSE  310", "CSE  312", "CSE  316", "CSE  320",
     "CSE  373","CSE  416"];
-  const math_reqs = ["MAT  131", "MAT  132", "MAT  211", "AMS  151","AMS  161", "AMS  210", "AMS  301","AMS  310"]; 
-  const tech_electives = ["CSE 304", "CSE  305","CSE  306","CSE  307","CSE  311","CSE  323","CSE  327",
+  const cse_math = ["MAT  131", "MAT  132", "MAT  211", "AMS  151","AMS  161", "AMS  210", "AMS  301","AMS  310"]; 
+  const cse_tech_electives = ["CSE 304", "CSE  305","CSE  306","CSE  307","CSE  311","CSE  323","CSE  327",
                           "CSE  328","CSE  331","CSE  332","CSE  333","CSE  334","CSE  336","CSE  337",
                           "CSE  351","CSE  352","CSE  353","CSE  354","CSE  355","CSE  356","CSE  360",
                             "CSE  361","CSE  362","CSE  363","CSE  364","CSE  366","CSE  370","CSE  376",
@@ -84,10 +76,12 @@ const FileUpload = () => {
                             ]
 
     const nat_sci = ["AST  203", "AST  205",
-    "BIO  201","BIO  204","BIO  202","BIO  203",
-    "CHE  131","CHE  133","CHE  132","CHE  152","CHE  154","CHE  321","CHE  322","CHE  322","CHE  331","CHE  332",
+    "BIO  201","BIO  202","BIO  203",
+    "CHE  131","CHE  132","CHE  152","CHE  321","CHE  322","CHE  322","CHE  331","CHE  332",
     "GEO  102","GEO  103","GEO  112","GEO  113","GEO  122",
-    "PHY  125","PHY  127","PHY  133","PHY  131","PHY  132","PHY  141","PHY  134","PHY  142","PHY  251","PHY  252"]
+    "PHY  125","PHY  127","PHY  131","PHY  132","PHY  141","PHY  134","PHY  142","PHY  251","PHY  252"]
+
+    const labs = ["BIO  204", "CHE  133", "CHE  154","PHY  133"]
 
     const ise_lower_divs = ["CSE  114", "CSE  214","ISE  218"]
     const ise_upper_divs = ["ISE  312", "ISE  305","ISE  316","ISE  320"]
@@ -125,74 +119,8 @@ const FileUpload = () => {
   function is_numeric_char(c) { return /\d/.test(c); }
   function isLetter(str) { return str.length === 1 && str.match(/[a-z]/i); }
 
-  const deleteCollection = async (collection, id) => {
-    const userDoc = doc(db, collection, id);
-    await deleteDoc(userDoc);
-  };
 
-  const deleteCourses = async () => {
-    var data = await getDocs(ldCollectionRef);
-    for(var i = 0; i < data.docs.length; i++){
-      deleteCollection("lower division", data.docs[i].id)
-    }
-    data = await getDocs(udCollectionRef);
-    for(i = 0; i < data.docs.length; i++){
-      deleteCollection("upper division", data.docs[i].id)
-    }
-    data = await getDocs(teCollectionRef);
-    for(i = 0; i < data.docs.length; i++){
-      deleteCollection("technical electives", data.docs[i].id)
-    }
-    data = await getDocs(mathCollectionRef);
-    for(i = 0; i < data.docs.length; i++){
-      deleteCollection("math", data.docs[i].id)
-    }
-    data = await getDocs(sciCollectionRef);
-    for(i = 0; i < data.docs.length; i++){
-      deleteCollection("natural sciences", data.docs[i].id)
-    }
-    data = await getDocs(ildCollectionRef);
-    for(i = 0; i < data.docs.length; i++){
-      deleteCollection("ise lower division", data.docs[i].id)
-    }
-    data = await getDocs(iudCollectionRef);
-    for(i = 0; i < data.docs.length; i++){
-      deleteCollection("ise upper division", data.docs[i].id)
-    }
-    data = await getDocs(iwrCollectionRef);
-    for(i = 0; i < data.docs.length; i++){
-      deleteCollection("ise write req", data.docs[i].id)
-    }
-    data = await getDocs(isemathCollectionRef);
-    for(i = 0; i < data.docs.length; i++){
-      deleteCollection("ise math req", data.docs[i].id)
-    }
-    data = await getDocs(iseteCollectionRef);
-    for(i = 0; i < data.docs.length; i++){
-      deleteCollection("ise technical electives", data.docs[i].id)
-    }
 
-    data = await getDocs(beCollectionRef);
-    for(i = 0; i < data.docs.length; i++){
-      deleteCollection("business economics", data.docs[i].id)
-    }
-    data = await getDocs(fisCollectionRef);
-    for(i = 0; i < data.docs.length; i++){
-      deleteCollection("financial information systems", data.docs[i].id)
-    }
-    data = await getDocs(hiCollectionRef);
-    for(i = 0; i < data.docs.length; i++){
-      deleteCollection("health informatics", data.docs[i].id)
-    }
-    data = await getDocs(snaCollectionRef);
-    for(i = 0; i < data.docs.length; i++){
-      deleteCollection("systems and network admin", data.docs[i].id)
-    }
-    data = await getDocs(tsmCollectionRef);
-    for(i = 0; i < data.docs.length; i++){
-      deleteCollection("tech systems management", data.docs[i].id)
-    }
-  };
 
   /**
    * Checks if a given course is already in a given collection
@@ -215,22 +143,162 @@ const FileUpload = () => {
   const addCourse = async (collection, data, name) => {
 
     const i = checkDup(collection, name);
-  //  console.log(`collection: ${collection}`)
-   // console.log(`data: ${data}`)
 
     if(i !== -1){
-    //  console.log("adding doc");
       await addDoc(collection, data);
     }
     else{
       var data = await getDocs(collection);
-      console.log("updating doc")
       const doc = data.docs[i] // get the current doc using return value from checkDup 
       await updateDoc(doc, data)
     }
 
   }
 
+  const resetCollection = async (arr, collection) => {
+    try {
+      for(var i = 0; i < arr.length; i++){
+        const docRef = doc(db, collection, arr[i]);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          //console.log("Document data:", docSnap.data());
+                  var fields ={ name: docSnap.data().name, credits: docSnap.data().credits, 
+                    year: "", term: "", grade: "" }
+          await updateDoc(docRef,fields)
+        } else {
+          console.log("No such document!");
+        }
+      }
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const resetMath = async () => {
+    var name = "MAT 125/MAT 131/AMS 151"
+    var fields ={ name: name, credits: 4, year: "", term: "", grade: "" }
+    var docRef = doc(db, "cse math", "Calc I");
+    await updateDoc(docRef,fields)
+
+    name = "MAT 127/MAT 132/AMS 161"
+    docRef = doc(db, "cse math", "Calc II");
+    fields ={ name: name, credits: 4, year: "", term: "", grade: "" }
+    await updateDoc(docRef,fields)
+
+    name = "MAT 211/AMS 210"
+    docRef = doc(db, "cse math", "LinAlg");
+    fields ={ name: name, credits: 3, year: "", term: "", grade: "" }
+    await updateDoc(docRef,fields)
+
+    name = "AMS 310"
+    docRef = doc(db, "cse math", "Stats");
+    fields ={ name: name, credits: 4, year: "", term: "", grade: "" }
+    await updateDoc(docRef,fields)
+
+    name = "AMS 301"
+    docRef = doc(db, "cse math", "Comb");
+    fields ={ name: name, credits: 4, year: "", term: "", grade: "" }
+    await updateDoc(docRef,fields)    
+  }
+
+  const resetTE = async () => {
+    var fields ={ name: "1", credits: 3, year: "", term: "", grade: "" }
+    var docRef = doc(db, "cse technical electives", "1");
+    await updateDoc(docRef,fields)  
+
+    fields ={ name: "2", credits: 3, year: "", term: "", grade: "" }
+    docRef = doc(db, "cse technical electives", "2");
+    await updateDoc(docRef,fields)  
+
+    fields ={ name: "3", credits: 3, year: "", term: "", grade: "" }
+    docRef = doc(db, "cse technical electives", "3");
+    await updateDoc(docRef,fields)  
+
+    fields ={ name: "4", credits: 3, year: "", term: "", grade: "" }
+    docRef = doc(db, "cse technical electives", "4");
+    await updateDoc(docRef,fields)  
+  }
+  const resetSci = async () => {
+    var fields ={ name: "1", credits: 3, year: "", term: "", grade: "" }
+    var docRef = doc(db, "science", "1");
+    await updateDoc(docRef,fields)  
+
+    fields ={ name: "2", credits: 3, year: "", term: "", grade: "" }
+    docRef = doc(db, "science", "2");
+    await updateDoc(docRef,fields)  
+
+    fields ={ name: "3", credits: 3, year: "", term: "", grade: "" }
+    docRef = doc(db, "science", "3");
+    await updateDoc(docRef,fields)  
+
+    fields ={ name: "Lab", credits: 3, year: "", term: "", grade: "" }
+    docRef = doc(db, "science", "Lab");
+    await updateDoc(docRef,fields)  
+  }
+  const resetISEUD = async () => {
+    var name = "ISE 305"
+    var fields ={ name: name, credits: 4, year: "", term: "", grade: "" }
+    var docRef = doc(db, "ise upper division", "ISE  305");
+    await updateDoc(docRef,fields)
+
+    name = "ISE 312"
+    fields ={ name: name, credits: 4, year: "", term: "", grade: "" }
+    docRef = doc(db, "ise upper division", "ISE  312");
+    await updateDoc(docRef,fields)
+
+    name = "ISE 320/BUS 340"
+    fields ={ name: name, credits: 4, year: "", term: "", grade: "" }
+    docRef = doc(db, "ise upper division", "Management");
+    await updateDoc(docRef,fields)
+
+    name = "CSE 310/ISE 316"
+    fields ={ name: name, credits: 4, year: "", term: "", grade: "" }
+    docRef = doc(db, "ise upper division", "Networking");
+    await updateDoc(docRef,fields)
+  }
+  const resetSNA = async () => {
+
+    var name = "ISE 311"
+    var fields ={ name: name, credits: 3, year: "", term: "", grade: "" }
+    var docRef = doc(db, "systems and network admin", "ISE  311");
+    await updateDoc(docRef,fields)
+
+    name = "ISE 321"
+    fields ={ name: name, credits: 3, year: "", term: "", grade: "" }
+    docRef = doc(db, "systems and network admin", "ISE  321");
+    await updateDoc(docRef,fields)
+
+    name = "ISE 487/488"
+    fields ={ name: name, credits: 3, year: "", term: "", grade: "" }
+    docRef = doc(db, "systems and network admin", "Research or Internship");
+    await updateDoc(docRef,fields)
+
+    name = "CSE/ISE 337"
+    fields ={ name: name, credits: 3, year: "", term: "", grade: "" }
+    docRef = doc(db, "systems and network admin", "Scripting Languages");
+    await updateDoc(docRef,fields)
+
+    name = "CSE/ISE 331"
+    fields ={ name: name, credits: 3, year: "", term: "", grade: "" }
+    docRef = doc(db, "systems and network admin", "Security");
+    await updateDoc(docRef,fields)
+
+    name = "Varies"
+    fields ={ name: name, credits: 3, year: "", term: "", grade: "" }
+    docRef = doc(db, "systems and network admin", "Sixth Req");
+    await updateDoc(docRef,fields)
+
+  }
+
+  const updateCourse = async (id, data, collection) => {
+    try{
+      const courseDoc = doc(db, collection, id);
+      await updateDoc(courseDoc, data);
+    }catch(e){
+      console.log(e)
+    }
+  };
 
   const onChange = e => {
     setFile(e.target.files[0]);
@@ -243,8 +311,6 @@ const FileUpload = () => {
     formData.append('file', file);
 
     try {
-
-      deleteCourses()
 
       const res = await axios.post('/upload', formData)
       
@@ -281,7 +347,6 @@ const FileUpload = () => {
       }
 
       isSnaVar = true
-      console.log(isSnaVar)
 
       for(i = 0; i < lines.length;i++){
         var b = lines[i].substring(0,4);
@@ -290,11 +355,11 @@ const FileUpload = () => {
           while(lines[i][j] === " "){
             j++; 
           }
-          console.log(foundName)
           if(foundName === false){
-            console.log(lines[i].substring(j)); 
             let name = lines[i].substring(j);
-            setName(name)
+            const docRef = doc(db, "Student Info", "Name")
+            var f = { name: name }
+            await updateDoc(docRef,f)
             break;
           }
         }
@@ -302,25 +367,33 @@ const FileUpload = () => {
 
       for(i = 0; i < lines.length;i++){
         b = lines[i].substring(0,7);
-        console.log(b)
         if(b === "Student"){
           let j = i + 5;
           while(!is_numeric_char(lines[i][j])){
             j++; 
           }
-          console.log(lines[i].substring(j)); 
           let id = lines[i].substring(j);
-          setId(id)
-          
+          const docRef = doc(db, "Student Info", "ID")
+          var f = { id: id }
+          await updateDoc(docRef,f)          
           break;
           
         }
       }
 
+      await resetCollection(upper_divs, "cse upper division")
+      await resetCollection(lower_divs, "cse lower division")
+      await resetCollection(lower_divs, "ise lower division")
+      await resetMath()
+      await resetTE()
+      await resetSci()
+      await resetISEUD()
+      await resetSNA()
 
       for (var i = 0; i < lines.length; i++) {
 
-            var b = "";
+          
+            b = "";
             b = lines[i].substring(0,4); 
             
             if(b === "Fall" || b === "Wint" || b === "Spri" || b === "Summ"){
@@ -331,9 +404,9 @@ const FileUpload = () => {
             if(lines[i].length >= 8){
           const course = lines[i].substring(0,8);
 
-          if(lower_divs.includes(course) || upper_divs.includes(course) || tech_electives.includes(course) 
-          || math_reqs.includes(course) || nat_sci.includes(course) || ise_lower_divs.includes(course) ||
-          ise_upper_divs.includes(course) || ise_write_req.includes(course) || be_core.includes(course) || 
+          if(lower_divs.includes(course) || upper_divs.includes(course) || cse_tech_electives.includes(course) 
+          || cse_math.includes(course) || nat_sci.includes(course) || ise_lower_divs.includes(course) ||
+          ise_upper_divs.includes(course) || ise_write_req.includes(course) || be_core.includes(course) || labs.includes(course) ||
           be_supp1.includes(course) || be_supp2.includes(course) || fis_core.includes(course) ||
           fis_supp.includes(course) || hi_core.includes(course) || hi_supp.includes(course) || ise_tech_electives.includes(course) ||
           sna_core.includes(course) || sna_supp.includes(course) || tsm_core.includes(course) || tsm_supp.includes(course)){
@@ -364,7 +437,6 @@ const FileUpload = () => {
             var season = "";
             var year = 0;
             while(j < s.length){
-              
               if(s[j] === " "){
                 year = parseInt(s.substring(j+1));
                 break;
@@ -372,69 +444,123 @@ const FileUpload = () => {
               season += s[j];
               j++; 
             }
-            const data = { name: course, credits: Number(credits), grade: grade, term: season, year: year }
+            var name = course.substring(0,4)+" "+course.substring(5)
+            year = year.toString()
+            const data = { name: name, credits: Number(credits), grade: grade, term: season, year: year }
             if(lower_divs.includes(course)){
-              await addCourse(ldCollectionRef, data, course);
+              await updateCourse(name, data, "cse lower division");
             }
-            else if(upper_divs.includes(course)){
-              await addCourse(udCollectionRef, data, course);
+            if(upper_divs.includes(course)){
+              await updateCourse(name, data, "cse upper division");
             }
-            else if(math_reqs.includes(course)){
-              await addCourse(mathCollectionRef, data, course);
+            if(cse_math.includes(course)){
+              if(course === "MAT  131" || course === "AMS  151" || course === "MAT  125"){
+                const docRef = doc(db, "cse math", "Calc I")
+                await updateDoc(docRef,data)
+              }
+              if(course === "MAT  132" || course === "AMS  161" || course === "MAT  127"){
+                const docRef = doc(db, "cse math", "Calc II")
+                await updateDoc(docRef,data)
+              }
+              if(course === "MAT  211" || course === "AMS  210"){
+                const docRef = doc(db, "cse math", "LinAlg")
+                await updateDoc(docRef,data)
+              }
+              if(course === "AMS  310"){
+                const docRef = doc(db, "cse math", "Stats")
+                await updateDoc(docRef,data)
+              }
+              if(course === "AMS  301"){
+                const docRef = doc(db, "cse math", "Comb")
+                await updateDoc(docRef,data)
+              }
             }
-            else if(tech_electives.includes(course)){
-              await addCourse(teCollectionRef, data, course);
+            if(cse_tech_electives.includes(course)){
+              if(num_cse_electives <= 4){
+                num_cse_electives += 1
+                if(num_cse_electives === 1){
+                  const docRef = doc(db, "cse technical electives", "1")
+                  await updateDoc(docRef,data)
+                }
+                else if(num_cse_electives === 2){
+                  const docRef = doc(db, "cse technical electives", "2")
+                  await updateDoc(docRef,data)
+                }
+                else if(num_cse_electives === 3){
+                  const docRef = doc(db, "cse technical electives", "3")
+                  await updateDoc(docRef,data)
+                }
+                else if(num_cse_electives === 4){
+                  const docRef = doc(db, "cse technical electives", "4")
+                  await updateDoc(docRef,data)
+                }
+              }
             }
-            else if(nat_sci.includes(course)){
-              await addCourse(sciCollectionRef, data, course);
+            if(nat_sci.includes(course)){
+              if(num_sci <= 3){
+                num_sci += 1
+                if(num_sci === 1){
+                  const docRef = doc(db, "science", "1")
+                  await updateDoc(docRef,data)
+                }
+                else if(num_sci === 2){
+                  const docRef = doc(db, "science", "2")
+                  await updateDoc(docRef,data)
+                }
+                else if(num_sci === 3){
+                  const docRef = doc(db, "science", "3")
+                  await updateDoc(docRef,data)
+                }
+              }
+            }
+            if(labs.includes(course)){
+              console.log("lab")
+              const docRef = doc(db, "science", "Lab")
+              await updateDoc(docRef,data)
             }
 
+
+            /* Check for ISE courses */
             if(ise_lower_divs.includes(course)){
-              await addCourse(ildCollectionRef, data, course);
+              await updateCourse(name, data, "ise lower division");
             }
-            else if(ise_upper_divs.includes(course)){
-              await addCourse(iudCollectionRef, data, course);
-            }
-            else if(ise_write_req.includes(course)){
-              await addCourse(iwrCollectionRef, data, course);
-            }
-            if(ise_math.includes(course)){
-              await addCourse(isemathCollectionRef, data, course);
-            }
-            if(ise_tech_electives.includes(course)){
-
-              /* Check if the course should be listed as a specialization or as an elective */
-              if(fis_supp.includes(course) && isFisVar === true){
-                await addCourse(fisCollectionRef, data, course);
+            if(ise_upper_divs.includes(course)){
+              if(course === "ISE  305" || course === "ISE  312"){
+                await updateCourse(name, data, "ise upper division");
               }
-              else if(sna_core.includes(course) && isSnaVar === true){
-                await addCourse(snaCollectionRef, data, course);
+              if(course === "ISE  320" || course === "BUS  340"){
+                const docRef = doc(db, "ise upper division", "Management")
+                await updateDoc(docRef,data)
               }
-              else{
-                await addCourse(iseteCollectionRef, data, course);
+              if(course === "CSE  310" || course === "ISE  316"){
+                const docRef = doc(db, "ise upper division", "Networking")
+                await updateDoc(docRef,data)
               }
-              
             }
-
-            if(be_core.includes(course) || be_supp1.includes(course) || be_supp2.includes(course)){
-              await addCourse(beCollectionRef, data, course);
+            if(sna_core.includes(course)){
+              if(course === "ISE  311" || course === "ISE  321"){
+                await updateCourse(name, data, "systems and network admin");
+              }
+              if(course === "ISE  487" || course === "ISE  488"){
+                  const docRef = doc(db, "systems and network admin", "Research or Internship")
+                  await updateDoc(docRef,data)
+              }
+              if(course === "CSE  331" || course === "ISE  331"){
+                  const docRef = doc(db, "systems and network admin", "Security")
+                  await updateDoc(docRef,data)
+              }
+              if(course === "CSE  337" || course === "ISE  337"){
+                  const docRef = doc(db, "systems and network admin", "Scripting Languages")
+                  await updateDoc(docRef,data)
+              }
             }
-            if(fis_core.includes(course) || fis_supp.includes(course)){
-              await addCourse(fisCollectionRef, data, course);
-            }
-            if(hi_core.includes(course) || hi_supp.includes(course)){
-              await addCourse(hiCollectionRef, data, course);
-            }
-            if(sna_core.includes(course) || sna_supp.includes(course)){
-              await addCourse(snaCollectionRef, data, course);
-            }
-            if(tsm_core.includes(course) || tsm_supp.includes(course)){
-              await addCourse(tsmCollectionRef, data, course);
+            if(sna_supp.includes(course)){
+              const docRef = doc(db, "systems and network admin", "Sixth Req")
+              await updateDoc(docRef,data)
             }
           }
         }
       }
-      let k = 0
       setMessage('File Uploaded'); 
     } catch (err) {
       if (err.response.status === 500) {
@@ -448,38 +574,38 @@ const FileUpload = () => {
 
   useEffect(() => {
     const getCourses = async () => {
-      const ldData = await getDocs(ldCollectionRef);
-      setLd(ldData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      const udData = await getDocs(udCollectionRef);
-      setUd(udData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      const teData = await getDocs(teCollectionRef);
-      setTe(teData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      const mathData = await getDocs(mathCollectionRef);
-      setMath(mathData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      const natData = await getDocs(sciCollectionRef);
-      setNatsci(natData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+       var info = await getDocs(CSEUDRef);
+       setCSEUD(info.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+       info = await getDocs(CSELDRef);
+       setCSELD(info.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+       info = await getDocs(CSEMathRef);
+       setCSEMath(info.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+       info = await getDocs(CSETERef);
+       setCSETE(info.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+       info = await getDocs(sciRef);
+       setSci(info.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
 
-      const ildData = await getDocs(ildCollectionRef);
-      setIld(ildData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      const iudData = await getDocs(iudCollectionRef);
-      setIud(iudData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      const iwrData = await getDocs(iwrCollectionRef);
-      setIwr(iwrData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      const imathData = await getDocs(isemathCollectionRef);
-      setImat(imathData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      const iseteData = await getDocs(iseteCollectionRef);
-      setIseTe(iseteData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+       info = await getDocs(ISEUDRef);
+       setISEUD(info.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+       info = await getDocs(ISELDRef);
+       setISELD(info.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+       
 
-      const beData = await getDocs(beCollectionRef);
-      setBe(beData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      const fisData = await getDocs(fisCollectionRef);
-      setFis(fisData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      const hiData = await getDocs(hiCollectionRef);
-      setHi(hiData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      const snaData = await getDocs(snaCollectionRef);
-      setSna(snaData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-      const tsmData = await getDocs(tsmCollectionRef);
-      setTsm(tsmData.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+       info = await getDocs(SNARef);
+       setSNA(info.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+
+
+       
+       let nameRef = doc(db, "Student Info", "Name")
+       let nameDoc = await getDoc(nameRef)
+       setName(await nameDoc.data().name)
+
+       let idRef = doc(db, "Student Info", "ID")
+       let idDoc = await getDoc(idRef)
+       setId(await idDoc.data().id)
+
+       console.log(CSEUD)
+
     };
 
     getCourses();
@@ -515,369 +641,52 @@ const FileUpload = () => {
       <Fragment>
         CSE major
         <h3>Lower Division
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {ld.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
+          <Table arr = {CSELD}/>
         </h3>
         <h3>Upper Division
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {ud.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
+          <Table arr = {CSEUD}/>
+        </h3>
+        <h3>Math
+          <Table arr = {CSEMath}/> 
         </h3>
         <h3>Technical Electives
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {te.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
-        </h3>
-        <h3>Math requirements
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {math.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
+          <Table arr = {CSETE}/> 
         </h3>
         <h3>Natural Sciences
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {natsci.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
+          <Table arr = {sci}/> 
         </h3>
-        </Fragment>
+      </Fragment>
         
       ) : (
         <Fragment>
         ISE Major
         <h3>Lower Division
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {ild.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
+          <Table arr = {ISELD}/>
         </h3>
         <h3>Upper Division
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {iud.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
-        </h3>
-        <h3>Math requirements
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {imat.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
-        </h3>
-        <h3>Writing requirement
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {iwr.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
-        </h3>
-        <h3>Technical Electives
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {isete.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
+          <Table arr = {ISEUD}/>
         </h3>
         { isBe ? ( 
           <h3>Specialization in Business Economics
-          <table className="table mt-5 text-center"> 
-          <thead>
-          <tr>
-            <th>Course</th>
-            <th>Credits</th>
-            <th>Grade</th>
-            <th>Term</th>
-            <th>Year</th>
-          </tr>
-        </thead>
-        <tbody>
-        {be.map(course => (
-            <tr key ={course.course}>
-              <td>{course.name}</td>
-              <td>{course.credits}</td>
-              <td>{course.grade}</td>
-              <td>{course.term}</td>
-              <td>{course.year}</td>
-                
-            </tr>
-        ))}
-        </tbody>
-          </table>
+          
           </h3>
         ) : (<div></div>)
       }
         { isHi ? ( 
           <h3>Specialization in Health Informatics
-          <table className="table mt-5 text-center"> 
-          <thead>
-          <tr>
-            <th>Course</th>
-            <th>Credits</th>
-            <th>Grade</th>
-            <th>Term</th>
-            <th>Year</th>
-          </tr>
-        </thead>
-        <tbody>
-        {hi.map(course => (
-            <tr key ={course.course}>
-              <td>{course.name}</td>
-              <td>{course.credits}</td>
-              <td>{course.grade}</td>
-              <td>{course.term}</td>
-              <td>{course.year}</td>
-                
-            </tr>
-        ))}
-        </tbody>
-          </table>
+         
           </h3>
           ) : (<div></div>)
       }
       { isSna ? ( 
           <h3>Specialization in Systems and Network Administration
-          <table className="table mt-5 text-center"> 
-          <thead>
-          <tr>
-            <th>Course</th>
-            <th>Credits</th>
-            <th>Grade</th>
-            <th>Term</th>
-            <th>Year</th>
-          </tr>
-        </thead>
-        <tbody>
-        {sna.map(course => (
-            <tr key ={course.course}>
-              <td>{course.name}</td>
-              <td>{course.credits}</td>
-              <td>{course.grade}</td>
-              <td>{course.term}</td>
-              <td>{course.year}</td>
-                
-            </tr>
-        ))}
-        </tbody>
-          </table>
+            <Table arr = {SNA}/>
           </h3>
         ) : (<div></div>)
       }
       { isFis ? ( 
         <h3>Specialization in Financial Information Systems
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {fis.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
+       
         </h3>
 
         ) : (<div></div>)
@@ -885,29 +694,6 @@ const FileUpload = () => {
 
       { isTsm ? ( 
         <h3>Specialization in Technological Systems Management
-        <table className="table mt-5 text-center"> 
-        <thead>
-        <tr>
-          <th>Course</th>
-          <th>Credits</th>
-          <th>Grade</th>
-          <th>Term</th>
-          <th>Year</th>
-        </tr>
-      </thead>
-      <tbody>
-      {tsm.map(course => (
-          <tr key ={course.course}>
-            <td>{course.name}</td>
-            <td>{course.credits}</td>
-            <td>{course.grade}</td>
-            <td>{course.term}</td>
-            <td>{course.year}</td>
-              
-          </tr>
-      ))}
-      </tbody>
-        </table>
         </h3>
         ) : (<div></div>)
       }
