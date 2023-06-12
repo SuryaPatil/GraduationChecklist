@@ -22,20 +22,17 @@ const FileUpload = () => {
   const [message, setMessage] = useState('');
   const [uploadPercentage, setUploadPercentage] = useState(0);
 
-  const [isCSE, setIsCSE] = useState(false); 
+  const [isCSE, setIsCSE] = useState(0); 
   const [name, setName] = useState("")
-  const [id, setId] = useState(id) 
+  const [id, setId] = useState("") 
   var foundName = false; 
 
   // specialization states
-  const [isBe, setIsBe] = useState(false) 
-  const [isHi, setIsHi] = useState(false) 
-  const [isSna, setIsSna] = useState(false) 
-  const [isFis, setIsFis] = useState(false) 
-  const [isTsm, setIsTsm] = useState(false) 
-
-  let isSnaVar = false
-  let isFisVar = false
+  const [isBE, setIsBE] = useState(false) 
+  const [isHI, setIsHI] = useState(false) 
+  const [isSNA, setIsSNA] = useState(false) 
+  const [isFIS, setIsFIS] = useState(false) 
+  const [isTSM, setIsTSM] = useState(false) 
 
   //const [courses, setCourses] = useState([]);
   const [CSEUD, setCSEUD] = useState([]); // upper division courses
@@ -48,7 +45,6 @@ const FileUpload = () => {
   const [ISELD, setISELD] = useState([])
 
   /* ISE specializations */
-
   const [SNA, setSNA] = useState([])
 
   const infoRef = collection(db, "Student Info")
@@ -288,6 +284,25 @@ const FileUpload = () => {
     fields ={ name: name, credits: 3, year: "", term: "", grade: "" }
     docRef = doc(db, "systems and network admin", "Sixth Req");
     await updateDoc(docRef,fields)
+  }
+
+  const resetSpecs = async () => {
+    var data = {SNA: false}
+    var docRef = doc(db, "Student Info", "Specialization");
+    await updateDoc(docRef, data)
+    data = {BE: false}
+    docRef = doc(db, "Student Info", "Specialization");
+    await updateDoc(docRef, data)
+    data = {TSM: false}
+    docRef = doc(db, "Student Info", "Specialization");
+    await updateDoc(docRef, data)
+    data = {HI: false}
+    docRef = doc(db, "Student Info", "Specialization");
+    await updateDoc(docRef, data)
+    data = {FIS: false}
+    docRef = doc(db, "Student Info", "Specialization");
+    await updateDoc(docRef, data)
+
 
   }
 
@@ -321,32 +336,43 @@ const FileUpload = () => {
       for (var i = 0; i < lines.length; i++) {
 
         if(lines[i] === "Plan:Computer Science Major"){
-          setIsCSE(true); 
+          let data = {CSE: true}
+          const docRef = doc(db, "Student Info", "Major");
+          await updateDoc(docRef, data)
           console.log("CSE")
         }
         if(lines[i] === "Plan:Information Systems Major"){
-          setIsCSE(false) 
+          let data = {CSE: false}
+          const docRef = doc(db, "Student Info", "Major");
+          await updateDoc(docRef, data)
         }
         if(lines[i] === "Plan:System and Network Administration Specialization"){
-          setIsSna(true)
-          isSnaVar = true
+          let data = {SNA: true}
+          const docRef = doc(db, "Student Info", "Specialization");
+          await updateDoc(docRef, data)
         }
         if(lines[i] === "Plan:Business Economics Specialization"){
-          setIsBe(true)
+          let data = {BE: true}
+          const docRef = doc(db, "Student Info", "Specialization");
+          await updateDoc(docRef, data)
         }
         if(lines[i] === "Plan:Health Informatics Specialization"){
-          setIsHi(true)
+          let data = {HI: true}
+          const docRef = doc(db, "Student Info", "Specialization");
+          await updateDoc(docRef, data)
         }
         if(lines[i] === "Plan:Technological Systems Management Specialization"){
-          setIsTsm(true)
+          let data = {TSM: true}
+          const docRef = doc(db, "Student Info", "Specialization");
+          await updateDoc(docRef, data)
         }
         if(lines[i] === "Plan:Financial Information Systems Specialization"){
-          setIsFis(true)
-          isFisVar = true
+          let data = {FIS: true}
+          const docRef = doc(db, "Student Info", "Specialization");
+          await updateDoc(docRef, data)
         }
       }
 
-      isSnaVar = true
 
       for(i = 0; i < lines.length;i++){
         var b = lines[i].substring(0,4);
@@ -389,6 +415,7 @@ const FileUpload = () => {
       await resetSci()
       await resetISEUD()
       await resetSNA()
+      await resetSpecs()
 
       for (var i = 0; i < lines.length; i++) {
 
@@ -599,10 +626,20 @@ const FileUpload = () => {
        let nameRef = doc(db, "Student Info", "Name")
        let nameDoc = await getDoc(nameRef)
        setName(await nameDoc.data().name)
-
        let idRef = doc(db, "Student Info", "ID")
        let idDoc = await getDoc(idRef)
        setId(await idDoc.data().id)
+       let majorRef = doc(db, "Student Info", "Major")
+       let majorDoc = await getDoc(majorRef)
+       setIsCSE(await majorDoc.data().CSE)
+
+       let specRef = doc(db, "Student Info", "Specialization")
+       let specDoc = await getDoc(specRef)
+       setIsBE(await specDoc.data().BE)
+       setIsSNA(await specDoc.data().SNA)
+       setIsHI(await specDoc.data().HI)
+       setIsTSM(await specDoc.data().TSM)
+       setIsFIS(await specDoc.data().FIS)
 
        console.log(CSEUD)
 
@@ -666,25 +703,25 @@ const FileUpload = () => {
         <h3>Upper Division
           <Table arr = {ISEUD}/>
         </h3>
-        { isBe ? ( 
+        { isBE ? ( 
           <h3>Specialization in Business Economics
           
           </h3>
         ) : (<div></div>)
       }
-        { isHi ? ( 
+        { isHI ? ( 
           <h3>Specialization in Health Informatics
          
           </h3>
           ) : (<div></div>)
       }
-      { isSna ? ( 
+      { isSNA ? ( 
           <h3>Specialization in Systems and Network Administration
             <Table arr = {SNA}/>
           </h3>
         ) : (<div></div>)
       }
-      { isFis ? ( 
+      { isFIS ? ( 
         <h3>Specialization in Financial Information Systems
        
         </h3>
@@ -692,7 +729,7 @@ const FileUpload = () => {
         ) : (<div></div>)
       }
 
-      { isTsm ? ( 
+      { isTSM ? ( 
         <h3>Specialization in Technological Systems Management
         </h3>
         ) : (<div></div>)
