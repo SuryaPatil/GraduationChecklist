@@ -320,6 +320,21 @@ const FileUpload = () => {
 
   const updateCourse = async (id, data, collection) => {
     try{
+      var term = ""
+      var year = ""
+      if(data.grade === "T"){
+        term = data.term
+        let i = 0
+        for(i = 0; i < term.length;i++){
+          if(is_numeric_char(term[i])){
+            break;
+          }
+          term = data.term.substring(0,i)
+          year = data.term.substring(i)
+        }
+        
+        data = { name: data.name, credits: Number(data.credits), grade: data.grade, term: term, year: year }
+      }
       const courseDoc = doc(db, collection, id);
       await updateDoc(courseDoc, data);
     }catch(e){
