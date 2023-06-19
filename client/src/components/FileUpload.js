@@ -43,6 +43,7 @@ const FileUpload = () => {
 
   const [ISEUD, setISEUD] = useState([])
   const [ISELD, setISELD] = useState([])
+  const [ISEMath, setISEMath] = useState([])
 
   /* ISE specializations */
   const [SNA, setSNA] = useState([])
@@ -55,6 +56,7 @@ const FileUpload = () => {
   const sciRef = collection(db, "science")
   const ISELDRef = collection(db, "ise lower division");
   const ISEUDRef = collection(db, "ise upper division");
+  const ISEMathRef = collection(db, "ise math")
   const SNARef = collection(db, "systems and network admin");
 
   var num_cse_electives = 0 // how many cse technical electives the student has taken
@@ -175,26 +177,36 @@ const FileUpload = () => {
     var name = "MAT 125/MAT 131/AMS 151"
     var fields ={ name: name, credits: 4, year: "", term: "", grade: "" }
     var docRef = doc(db, "cse math", "Calc I");
+    var iseDocRef = doc(db, "ise math", "Calc I");
     await updateDoc(docRef,fields)
+    await updateDoc(iseDocRef,fields)
 
     name = "MAT 127/MAT 132/AMS 161"
     docRef = doc(db, "cse math", "Calc II");
     fields ={ name: name, credits: 4, year: "", term: "", grade: "" }
+    iseDocRef = doc(db, "ise math", "Calc II");
     await updateDoc(docRef,fields)
+    await updateDoc(iseDocRef,fields)
 
     name = "MAT 211/AMS 210"
     docRef = doc(db, "cse math", "LinAlg");
     fields ={ name: name, credits: 3, year: "", term: "", grade: "" }
+    iseDocRef = doc(db, "ise math", "LinAlg");
     await updateDoc(docRef,fields)
+    await updateDoc(iseDocRef,fields)
 
     name = "AMS 310"
     docRef = doc(db, "cse math", "Stats");
-    fields ={ name: name, credits: 4, year: "", term: "", grade: "" }
+    iseDocRef = doc(db, "ise math", "Stats");
+    fields ={ name: name, credits: 3, year: "", term: "", grade: "" }
     await updateDoc(docRef,fields)
+    name = "AMS 110/AMS 310/ECO 320"
+    fields ={ name: name, credits: 3, year: "", term: "", grade: "" }
+    await updateDoc(iseDocRef, fields)
 
     name = "AMS 301"
     docRef = doc(db, "cse math", "Comb");
-    fields ={ name: name, credits: 4, year: "", term: "", grade: "" }
+    fields ={ name: name, credits: 3, year: "", term: "", grade: "" }
     await updateDoc(docRef,fields)    
   }
 
@@ -347,26 +359,31 @@ const FileUpload = () => {
           await updateDoc(docRef, data)
         }
         if(lines[i] === "Plan:System and Network Administration Specialization"){
+          console.log("Plan:System and Network Administration Specialization")
           let data = {SNA: true}
           const docRef = doc(db, "Student Info", "Specialization");
           await updateDoc(docRef, data)
         }
         if(lines[i] === "Plan:Business Economics Specialization"){
+          console.log("Plan:Business Economics Specialization")
           let data = {BE: true}
           const docRef = doc(db, "Student Info", "Specialization");
           await updateDoc(docRef, data)
         }
         if(lines[i] === "Plan:Health Informatics Specialization"){
+          console.log("Plan:Health Informatics Specialization")
           let data = {HI: true}
           const docRef = doc(db, "Student Info", "Specialization");
           await updateDoc(docRef, data)
         }
         if(lines[i] === "Plan:Technological Systems Management Specialization"){
+          console.log("Plan:Technological Systems Management Specialization")
           let data = {TSM: true}
           const docRef = doc(db, "Student Info", "Specialization");
           await updateDoc(docRef, data)
         }
         if(lines[i] === "Plan:Financial Information Systems Specialization"){
+          console.log("Plan:Financial Information Systems Specialization")
           let data = {FIS: true}
           const docRef = doc(db, "Student Info", "Specialization");
           await updateDoc(docRef, data)
@@ -564,6 +581,25 @@ const FileUpload = () => {
                 await updateDoc(docRef,data)
               }
             }
+            if(ise_math.includes(course)){
+              console.log("ise math")
+              if(course === "MAT  131" || course === "AMS  151" || course === "MAT  125"){
+                const docRef = doc(db, "ise math", "Calc I")
+                await updateDoc(docRef,data)
+              }
+              if(course === "MAT  132" || course === "AMS  161" || course === "MAT  127"){
+                const docRef = doc(db, "ise math", "Calc II")
+                await updateDoc(docRef,data)
+              }
+              if(course === "MAT  211" || course === "AMS  210"){
+                const docRef = doc(db, "ise math", "LinAlg")
+                await updateDoc(docRef,data)
+              }
+              if(course === "AMS  310" || course === "ECO  320" || course === "AMS  110"){
+                const docRef = doc(db, "ise math", "Stats")
+                await updateDoc(docRef,data)
+              }
+            }
             if(sna_core.includes(course)){
               if(course === "ISE  311" || course === "ISE  321"){
                 await updateCourse(name, data, "systems and network admin");
@@ -616,7 +652,8 @@ const FileUpload = () => {
        setISEUD(info.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
        info = await getDocs(ISELDRef);
        setISELD(info.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-       
+       info = await getDocs(ISEMathRef);
+       setISEMath(info.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
 
        info = await getDocs(SNARef);
        setSNA(info.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
@@ -702,6 +739,9 @@ const FileUpload = () => {
         </h3>
         <h3>Upper Division
           <Table arr = {ISEUD}/>
+        </h3>
+        <h3>Math
+          <Table arr = {ISEMath}/>
         </h3>
         { isBE ? ( 
           <h3>Specialization in Business Economics
