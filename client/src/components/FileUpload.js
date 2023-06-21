@@ -159,7 +159,6 @@ const FileUpload = () => {
         const docRef = doc(db, collection, arr[i]);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          //console.log("Document data:", docSnap.data());
                   var fields ={ name: docSnap.data().name, credits: docSnap.data().credits, 
                     year: "", term: "", grade: "" }
           await updateDoc(docRef,fields)
@@ -357,6 +356,7 @@ const FileUpload = () => {
       const res = await axios.post('/upload', formData)
       
       let str = res.data;
+      console.log(str)
       const splitLines = str => str.split(/\r?\n/);
       const lines = splitLines(str);
       var s = "";
