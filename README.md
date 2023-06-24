@@ -28,6 +28,4 @@ In a web browser, type localhost:3000. At this point, you should see this page:
 
 Click "Browse" to select a PDF transcript from your computer, and click "Upload" to upload your file. Now, look at the output in your terminal. If you see the word "Text" followed by the text extracted from the PDF, the program will be able to parse the PDF. 
 
-Example terminal output where program cannot parse the transcript (the transcript format Prof. Esmaili sent me): 
-<img width="604" alt="Screen Shot 2023-03-03 at 4 26 09 PM" src="https://user-images.githubusercontent.com/78182536/222833316-a0b11393-604e-40c0-8369-c0602ee30561.png">
 
